@@ -39,6 +39,8 @@ lokalen Webserver auszuliefern statt sie direkt zu öffnen.
   Richtungen: `mueller` und `muller` finden beide *Müller*. Wortteile in Komposita
   werden gefunden, `rechnung` trifft *Rechnungsprüfung*. Mehrere Begriffe sind
   UND-verknüpft, `"in Anführungszeichen"` sucht die genaue Wortfolge.
+- **Wiedervorlage**: ein Eintrag lässt sich auf ein Datum in der Zukunft legen und
+  verschwindet bis dahin aus dem Tagesgeschäft.
 - **Filter** für alle, offene oder erledigte Einträge, dazu ein Schalter für
   „nur wichtige".
 - **Hell, dunkel oder Systemeinstellung**, umschaltbar über das Symbol in der Kopfzeile.
@@ -73,6 +75,40 @@ Tage, von denen alles weggewandert ist, bleiben als schmale Zeile in der Geschic
 stehen, etwa **Dienstag, 8. September · 4 mitgenommen**. Sonst läse sich der Verlauf
 wie der eines Menschen, der jeden Tag alles geschafft hat.
 
+## Wiedervorlage
+
+Die Übernahme kennt für sich genommen nur zwei Zustände: entweder ein Eintrag steht
+ab morgen jeden Tag bei *Heute*, oder er liegt angeheftet in der Vergangenheit und
+fällt dir nie wieder auf. Für alles, was erst in zwei Wochen dran ist, taugt beides
+nicht. Dafür gibt es den dritten Zustand.
+
+Im Zeilenmenü hinter den drei Punkten steht eine Zeile **Vorlegen** mit drei
+Schnellwahlen und einem Feld für ein beliebiges Datum:
+
+| Auswahl | Bedeutung |
+|---|---|
+| **Morgen** | ein Tag weiter |
+| **Nächste Woche** | sieben Tage weiter |
+| **Montag** | der nächste Montag, nie der heutige |
+| Datumsfeld | ein beliebiger Tag nach heute |
+
+Was so vorgelegt wurde, sammelt sich in einem eingeklappten Bereich **Geplant** über
+dem heutigen Tag, mit Anzahl und dem nächsten fälligen Datum. Aufgeklappt stehen die
+Einträge nach Datum gruppiert, jeder mit dem Abzeichen **vorgemerkt**. Am Stichtag
+taucht der Eintrag ganz normal bei *Heute* auf und wird von da an wieder mitgenommen.
+
+Weitere Regeln:
+
+- Die Tastatur kürzt ab: **`S`** legt den ausgewählten Eintrag auf morgen.
+- Ein Datum in der Vergangenheit oder heute wird abgelehnt.
+- **Auf heute holen** im Zeilenmenü macht die Vorlage rückgängig, ebenso der Knopf
+  in der Kurzmeldung oder `Strg+Z`.
+- Hakst du etwas Vorgemerktes vorzeitig ab, rutscht es auf heute. Getan hast du es
+  ja heute.
+- Eine Wiedervorlage ersetzt das Anheften. Beides gleichzeitig ergibt keinen Sinn.
+- Steht ein Eintrag in der Zukunft, **ohne** vorgemerkt zu sein, weist die App im
+  Datumsschild darauf hin. Das ist fast immer eine falsch gestellte Uhr.
+
 ## Tags und Wichtig
 
 Beides schreibst du direkt in den Text, es gibt keine Extra-Felder.
@@ -98,7 +134,7 @@ Einzelne Tasten wirken nur, wenn kein Textfeld den Fokus hat. Die Feststelltaste
 stört nicht.
 
 Im Menü hinter den drei Punkten schaltet **Tastenkürzel aktiv** die Einzelzeichen ab,
-also `N`, `/`, `1`, `2`, `3`, `?`, `W`, `D`, `j` und `k`. Das ist die Ausstiegsklappe,
+also `N`, `/`, `1`, `2`, `3`, `?`, `W`, `D`, `S`, `j` und `k`. Das ist die Ausstiegsklappe,
 die Vorlesesoftware und Spracheingabe brauchen, weil solche Tasten dort sonst
 ungewollt auslösen.
 
@@ -139,6 +175,7 @@ In der Liste:
 | `Leertaste` | Erledigt umschalten |
 | `Eingabe` oder `F2` | Bearbeiten |
 | `W` | Wichtig umschalten |
+| `S` | Auf morgen vorlegen |
 | `Entf` | Löschen, mit Rückgängig |
 
 Sobald die Eingabezeile mehrere Zeilen enthält, eingefügt oder mit
@@ -222,11 +259,11 @@ Drei Regeln, die beim Ändern nicht brechen dürfen:
 1. **Nutzertext wird niemals zu HTML.** Kein `innerHTML` mit Eingaben, keine aus
    Text zusammengesetzten Adressen. Alles geht durch `textContent`.
 2. **`createdDayKey` wird genau einmal geschrieben und nie wieder.** Daran hängt das
-   Abzeichen, das den Ursprungstag anzeigt. `dayKey` dagegen ändert sich an fünf
+   Abzeichen, das den Ursprungstag anzeigt. `dayKey` dagegen ändert sich an sechs
    Stellen: `runCarryOver` und `undoCarry` in Abschnitt 8, sowie `toggleDone`,
-   `setPinned` und `pullToToday` in Abschnitt 13. Angelegt wird er in `addItems`.
-   Wer eine sechste Stelle braucht, sollte zuerst prüfen, ob es nicht eine der
-   fünf schon tut.
+   `setPinned`, `pullToToday` und `deferItem` in Abschnitt 13. Angelegt wird er in
+   `addItems`. Wer eine siebte Stelle braucht, sollte zuerst prüfen, ob es nicht
+   eine der sechs schon tut.
 3. **Tagesschlüssel entstehen nur aus `getFullYear`, `getMonth` und `getDate`.**
    `toISOString()` ist UTC und schöbe jede Notiz zwischen Mitternacht und zwei Uhr
    auf den Vortag.

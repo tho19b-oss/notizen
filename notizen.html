@@ -344,6 +344,31 @@ ul.rows{ list-style:none; margin:6px 0 0; padding:0; }
 .groupdiv svg{ width:16px; height:16px; transition:transform 200ms var(--ease-out); }
 .groupdiv[aria-expanded="false"] svg{ transform:rotate(-90deg); }
 
+/* Geplant: Einträge mit einem Datum in der Zukunft */
+.planned{ margin-bottom:24px; }
+.planned .groupdiv{ margin:0 0 6px; }
+.planned__next{ margin-left:auto; margin-right:8px; color:var(--text-3); font-weight:400; }
+.planned__date{
+  font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
+  letter-spacing:.005em; color:var(--text-2); padding:8px 16px 2px;
+}
+.planned ul.rows{ margin-top:0; padding:0 8px; }
+.planned .item:hover,.planned .item:focus-within{ background:var(--row-hover-ground); }
+.deferrow{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding:6px 8px; margin:2px 0;
+}
+.deferrow__label{
+  font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
+  letter-spacing:.005em; color:var(--text-3);
+}
+.deferrow .chip{ cursor:pointer; }
+.deferdate{
+  height:24px; border:1px solid var(--border-strong); border-radius:6px;
+  background:var(--surface-sunken); color:var(--text-2);
+  font-family:var(--font-small); font-size:12px; padding:0 4px; max-width:130px;
+}
+
 /* ---------- 6. ZEILE ---------- */
 .item{
   position:relative; display:grid; grid-template-columns:12px 20px minmax(0,1fr);
@@ -887,6 +912,13 @@ function shiftDayKey(k, n) {
   var d = dateFromDayKey(k);
   return dayKeyOf(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n));
 }
+/* 1 = Montag. Liegt der Wochentag heute an, ist die nächste Woche gemeint. */
+function nextWeekdayKey(fromKey, weekday) {
+  var d = dateFromDayKey(fromKey);
+  var delta = (weekday - d.getDay() + 7) % 7;
+  if (delta === 0) delta = 7;
+  return shiftDayKey(fromKey, delta);
+}
 function badgeLabel(originKey, todayKey) {
   var n = dayDiff(originKey, todayKey);
   if (n === 1) return "von gestern";
@@ -1130,7 +1162,8 @@ function emptyState(todayKey) {
       theme: "system",
       carryOver: true,
       shortcuts: true,
-      ui: { statusFilter: "alle", activeTags: [], onlyImportant: false, carryGroupOpen: false, daysLoaded: 30 },
+      ui: { statusFilter: "alle", activeTags: [], onlyImportant: false, carryGroupOpen: false,
+            plannedOpen: false, daysLoaded: 30 },
       lastExportAt: null
     },
     meta: { rev: 1, writerId: "w_" + Math.random().toString(36).slice(2, 8), seqCounter: 1,
@@ -1166,6 +1199,7 @@ function normalise(obj, todayKey) {
       if (Array.isArray(u.activeTags)) o.ui.activeTags = u.activeTags.filter(function (t) { return typeof t === "string"; }).slice(0, 50);
       o.ui.onlyImportant = !!u.onlyImportant;
       o.ui.carryGroupOpen = !!u.carryGroupOpen;
+      o.ui.plannedOpen = !!u.plannedOpen;
       if (typeof u.daysLoaded === "number" && u.daysLoaded >= 30) o.ui.daysLoaded = Math.min(u.daysLoaded, 100000);
     }
   }
@@ -1212,6 +1246,7 @@ function normalise(obj, todayKey) {
       updatedAt: updatedAt,
       seq: seq,
       carryCount: (typeof r.carryCount === "number" && isFinite(r.carryCount)) ? r.carryCount : 0,
+      deferred: !!r.deferred,
       tags: tagsOf(r.text)
     });
   }
@@ -1503,7 +1538,8 @@ function buildModel() {
     if (it.createdDayKey !== it.dayKey) originDays[it.createdDayKey]++;
   }
   realDays[ui.todayKey] = true;
-  var realKeys = Object.keys(realDays).sort().reverse();
+  /* Vorgemerktes liegt in der Zukunft und gehört nicht ins Tagesfenster. */
+  var realKeys = Object.keys(realDays).filter(function (k) { return k <= ui.todayKey; }).sort().reverse();
 
   var filtered = isFiltered();
   var windowKeys = realKeys;
@@ -1536,6 +1572,14 @@ function buildModel() {
     }
   }
 
+  /* Alles mit einem Tag nach heute wird zu "Geplant" und erscheint nicht
+     als eigener Tagesblock über der Liste. */
+  var planned = [];
+  Object.keys(byDay).filter(function (k) { return k > ui.todayKey; }).sort().forEach(function (k) {
+    planned.push({ key: k, rows: byDay[k].slice().sort(compareItems) });
+    delete byDay[k];
+  });
+
   var sections = [];
   var dayKeys = Object.keys(byDay);
   for (i = 0; i < ghosts.length; i++) dayKeys.push(ghosts[i].key);
@@ -1557,7 +1601,6 @@ function buildModel() {
       type: "day",
       key: k,
       rows: rows,
-      future: k > ui.todayKey,
       today: k === ui.todayKey,
       movedAway: countMovedAway(k)
     });
@@ -1574,7 +1617,8 @@ function buildModel() {
     i = j - 1;
   }
 
-  return { sections: merged, visible: visible, capped: capped, truncated: truncated, filtered: filtered, totalDays: realKeys.length };
+  return { sections: merged, planned: planned, visible: visible, capped: capped,
+           truncated: truncated, filtered: filtered, totalDays: realKeys.length };
 }
 
 function countMovedAway(dayKey) {
@@ -1660,7 +1704,14 @@ function buildMeta(item) {
   meta.id = "m-" + item.id;
   if (item.important) meta.appendChild(el("span", "sr-only", "Wichtig. "));
 
-  if (item.dayKey !== item.createdDayKey) {
+  /* Vorgemerktes wurde nicht uebernommen, sondern bewusst nach vorn gelegt.
+     Das Abzeichen muss diesen Unterschied benennen. */
+  if (item.deferred && item.dayKey > ui.todayKey) {
+    var pb = el("span", "badge", "vorgemerkt");
+    pb.title = "Vorgemerkt fuer " + fmtLongFull(item.dayKey) +
+      (item.createdDayKey !== item.dayKey ? " · notiert am " + fmtLongFull(item.createdDayKey) : "");
+    meta.appendChild(pb);
+  } else if (item.dayKey !== item.createdDayKey) {
     var age = dayDiff(item.createdDayKey, ui.todayKey);
     var badge = el("span", "badge" + (age >= 14 ? " old" : ""));
     badge.title = "Übernommen von " + fmtLongFull(item.createdDayKey);
@@ -1781,7 +1832,6 @@ function renderDayHead(sec) {
     var rest = fmtLong(sec.key).split(", ").slice(1).join(", ");
     left.appendChild(el("span", "day__date", rest));
   }
-  if (sec.future) left.appendChild(el("span", "day__future", "Liegt in der Zukunft"));
   h.appendChild(left);
   h.appendChild(el("span", "day__count", dayCounter(sec)));
   return h;
@@ -1832,6 +1882,39 @@ function renderDay(sec) {
     section.appendChild(makeRows(sec.rows));
   }
   return section;
+}
+
+function renderPlanned(planned) {
+  if (!planned.length) return null;
+  var total = 0, i;
+  for (i = 0; i < planned.length; i++) total += planned[i].rows.length;
+  var open = !!state.settings.ui.plannedOpen || !!ui.query;
+
+  var wrap = el("section", "planned");
+  var head = el("button", "groupdiv");
+  head.type = "button";
+  head.setAttribute("aria-expanded", open ? "true" : "false");
+  head.appendChild(el("span", null, "Geplant (" + total + ")"));
+  head.appendChild(el("span", "planned__next", "nächster am " + fmtLong(planned[0].key)));
+  head.appendChild(icon("chevron"));
+  head.addEventListener("click", function () {
+    state.settings.ui.plannedOpen = !state.settings.ui.plannedOpen;
+    mutate(function () {});
+    renderAll();
+    var h = document.querySelector(".planned .groupdiv");
+    if (h) h.focus();
+  });
+  wrap.appendChild(head);
+
+  if (open) planned.forEach(function (g) {
+    var lab = el("div", "planned__date");
+    lab.appendChild(document.createTextNode(fmtLong(g.key)));
+    var ungeplant = g.rows.some(function (r) { return !r.deferred; });
+    if (ungeplant) lab.appendChild(el("span", "day__future", " · nicht vorgemerkt, bitte die Uhr prüfen"));
+    wrap.appendChild(lab);
+    wrap.appendChild(makeRows(g.rows));
+  });
+  return wrap;
 }
 
 function renderGhost(sec) {
@@ -1949,8 +2032,11 @@ function renderAll() {
   var host = document.getElementById("days");
   host.textContent = "";
 
+  var geplant = renderPlanned(model.planned);
+  if (geplant) host.appendChild(geplant);
+
   if (!model.visible.length && isFiltered()) {
-    host.appendChild(renderNoResults());
+    if (!geplant) host.appendChild(renderNoResults());
   } else {
     for (var i = 0; i < model.sections.length; i++) {
       var sec = model.sections[i];
@@ -2216,7 +2302,7 @@ function addItems(raw, forceImportant) {
         important: prepared[i].important, pinned: false,
         createdAt: now + i, createdDayKey: todayKey, dayKey: todayKey,
         doneAt: null, doneDayKey: null, updatedAt: now + i, seq: seq, carryCount: 0,
-        tags: tagsOf(prepared[i].text)
+        deferred: false, tags: tagsOf(prepared[i].text)
       };
       st.items.push(item);
       created.push(item);
@@ -2263,6 +2349,7 @@ function toggleDone(id) {
       if (willReopenAndCarry) { it.dayKey = todayKey; it.carryCount = (it.carryCount || 0) + 1; }
     } else {
       it.done = true; it.doneAt = now; it.doneDayKey = todayKey;
+      if (it.dayKey > todayKey) { it.dayKey = todayKey; it.deferred = false; }
     }
     it.updatedAt = now;
   });
@@ -2414,10 +2501,35 @@ function pullToToday(id) {
   var todayKey = syncToday();
   withItem(id, "Auf heute geholt", function (it) {
     it.dayKey = todayKey;
+    it.deferred = false;
     it.updatedAt = Date.now();
   });
   renderAll();
   focusRow(id, "cb");
+  announce("Wieder für heute vorgemerkt.");
+}
+
+/* Wiedervorlage: der Eintrag verschwindet aus dem Tagesgeschäft und kommt
+   am gewählten Tag von selbst zurück. Die Übernahme fasst ihn bis dahin
+   nicht an, weil sie nur Einträge mit einem Tag VOR heute bewegt. */
+function deferItem(id, toKey, label) {
+  var todayKey = syncToday();
+  if (!isDayKey(toKey) || toKey <= todayKey) {
+    showToast("Das Datum muss nach heute liegen.");
+    return;
+  }
+  if (!findItem(id)) return;
+  withItem(id, "Wiedervorlage", function (it) {
+    it.dayKey = toKey;
+    it.deferred = true;
+    it.pinned = false;          /* eine Wiedervorlage ersetzt das Anheften */
+    it.updatedAt = Date.now();
+  });
+  var undoEntry = Undo.lastEntry;
+  renderAll();
+  var wann = label || fmtLong(toKey);
+  announce("Wiedervorlage am " + fmtLongFull(toKey) + ".");
+  showToast("Vorgemerkt für " + wann, function () { Undo.revertTo(undoEntry); });
 }
 
 /* ---- Bearbeiten an Ort und Stelle ---- */
@@ -2717,6 +2829,35 @@ function openOverflowMenu() {
   }, { label: "Weitere Optionen", role: "menu" });
 }
 
+/* Eine Zeile mit schnellen Terminen plus freier Datumswahl. */
+function addDeferRow(node, id) {
+  var todayKey = syncToday();
+  var wrap = el("div", "deferrow");
+  wrap.appendChild(el("span", "deferrow__label", "Vorlegen:"));
+  [["Morgen", shiftDayKey(todayKey, 1)],
+   ["Nächste Woche", shiftDayKey(todayKey, 7)],
+   [WD_LANG[1], nextWeekdayKey(todayKey, 1)]].forEach(function (o) {
+    var b = el("button", "chip", o[0]);
+    b.type = "button";
+    b.title = fmtLongFull(o[1]);
+    b.setAttribute("aria-label", "Vorlegen auf " + fmtLongFull(o[1]));
+    b.addEventListener("click", function () { closePopover(); deferItem(id, o[1], o[0]); });
+    wrap.appendChild(b);
+  });
+  var inp = document.createElement("input");
+  inp.type = "date";
+  inp.className = "deferdate";
+  inp.min = shiftDayKey(todayKey, 1);
+  inp.setAttribute("aria-label", "Eigenes Datum für die Wiedervorlage");
+  inp.addEventListener("change", function () {
+    var v = inp.value;
+    if (!isDayKey(v)) return;
+    closePopover();
+    deferItem(id, v);
+  });
+  wrap.appendChild(inp);
+  node.appendChild(wrap);
+}
 function openRowMenu(anchor, id) {
   var item = findItem(id);
   if (!item) return;
@@ -2731,6 +2872,7 @@ function openRowMenu(anchor, id) {
     }
     add(item.important ? "Wichtig-Markierung entfernen" : "Als wichtig markieren", function () { toggleImportant(id); });
     add("Bearbeiten", function () { startEdit(id); });
+    if (!item.done) addDeferRow(node, id);
     if (item.dayKey > ui.todayKey) add("Auf heute holen", function () { pullToToday(id); });
     else if (item.pinned) add("Wieder mitnehmen", function () { setPinned(id, false); });
     else if (item.dayKey !== item.createdDayKey) add("Am Ursprungstag lassen", function () { setPinned(id, true, item.createdDayKey); });
@@ -2784,7 +2926,7 @@ var SHORTCUTS = [
     ["Alt+↑ Alt+↓", "Voriger / nächster Tag"], ["Pos1 Ende", "Erster / letzter Eintrag des Tages"],
     ["Strg+Pos1 Strg+Ende", "Erster / letzter Eintrag insgesamt"], ["Bild↑ Bild↓", "Zehn Einträge"],
     ["Leertaste", "Erledigt umschalten"], ["Eingabe oder F2", "Bearbeiten"],
-    ["W", "Wichtig umschalten"], ["Entf", "Löschen"]]]
+    ["W", "Wichtig umschalten"], ["S", "Auf morgen vorlegen"], ["Entf", "Löschen"]]]
 ];
 function openShortcuts() {
   openModal(function (box) {
@@ -3260,6 +3402,7 @@ function onKeydown(e) {
     }
     case "Enter": case "F2": e.preventDefault(); startEdit(id); break;
     case "w": if (einzeltasten) { e.preventDefault(); toggleImportant(id); } break;
+    case "s": if (einzeltasten) { e.preventDefault(); deferItem(id, shiftDayKey(syncToday(), 1), "morgen"); } break;
     case "Delete": e.preventDefault(); deleteItem(id); break;
   }
 }
