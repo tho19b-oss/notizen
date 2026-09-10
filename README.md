@@ -31,9 +31,7 @@ lokalen Webserver auszuliefern statt sie direkt zu öffnen.
 - **Filter** für alle, offene oder erledigte Einträge, dazu ein Schalter für
   „nur wichtige".
 - **Hell, dunkel oder Systemeinstellung**, umschaltbar über das Symbol in der Kopfzeile.
-- **Mit eingeschalteten Kürzeln vollständig über die Tastatur bedienbar**, mit
-  Live-Ansagen für Vorlesesoftware. Schaltest du die Kürzel ab, verschwindet auch
-  die Pfeiltasten-Navigation der Liste, siehe unten.
+- **Vollständig über die Tastatur bedienbar**, mit Live-Ansagen für Vorlesesoftware.
 
 ## Übernahme auf heute
 
@@ -48,11 +46,12 @@ Wichtig dabei:
 - **Erledigtes bleibt an seinem Tag.** Nur Offenes wandert mit.
 - Ab acht mitgenommenen Einträgen klappt die Gruppe **Übernommen** ein, damit die
   vier Dinge, die du heute geschrieben hast, nicht unter zwanzig alten verschwinden.
-- Ein bereits mitgenommener Eintrag lässt sich über das Zeilenmenü mit **Am
-  Ursprungstag lassen** zurückschicken. Er bleibt dort liegen und wird nicht mehr
-  übernommen, bis du **Wieder mitnehmen** wählst. Vorbeugend anheften geht nicht:
-  solange ein Eintrag an seinem Ursprungstag steht, bietet das Menü diese Aktion
-  nicht an.
+- Ein Eintrag lässt sich vom Mitnehmen **ausnehmen**, über das Zeilenmenü hinter den
+  drei Punkten. Bei einem Eintrag an seinem eigenen Tag heißt die Aktion **Nicht
+  mitnehmen**, bei einem bereits mitgenommenen **Am Ursprungstag lassen**, was ihn
+  zusätzlich dorthin zurückschickt. In beiden Fällen holt ihn **Wieder mitnehmen**
+  zurück ins Tagesgeschäft. Ausgenommene Einträge tragen das Abzeichen
+  **angeheftet**.
 - Öffnest du einen erledigten Eintrag von einem früheren Tag wieder, kommt er nach
   heute. Ein Hinweis mit **Rückgängig** sagt es dir.
 - Die Übernahme ist abschaltbar, im Menü hinter den drei Punkten.
@@ -87,12 +86,15 @@ manchmal wirkungslos bleibt.
 Einzelne Tasten wirken nur, wenn kein Textfeld den Fokus hat. Die Feststelltaste
 stört nicht.
 
-Im Menü hinter den drei Punkten schaltet **Tastenkürzel aktiv** die Einzeltasten ab,
-also alles aus den Tabellen außer den Kombinationen mit Strg und Alt. `Strg+Z`,
-`Strg+Umschalt+Z`, `Alt+↑`, `Alt+↓`, `Strg+Pos1`, `Strg+Ende` und sämtliche Tasten
-der Eingabezeile wirken weiter. Beachte: der Schalter nimmt dir auch die
-Pfeiltasten-Navigation in der Liste, und damit den einzigen Weg zu den Knöpfen und
-Tag-Chips einer Zeile.
+Im Menü hinter den drei Punkten schaltet **Tastenkürzel aktiv** die Einzelzeichen ab,
+also `N`, `/`, `1`, `2`, `3`, `?`, `W`, `D`, `j` und `k`. Das ist die Ausstiegsklappe,
+die Vorlesesoftware und Spracheingabe brauchen, weil solche Tasten dort sonst
+ungewollt auslösen.
+
+Alles, was zum Bedienen nötig ist, bleibt davon unberührt: Pfeiltasten, `Pos1`,
+`Ende`, `Bild↑`, `Bild↓`, `Leertaste`, `Eingabe`, `F2`, `Entf`, die Kombinationen mit
+Strg und Alt sowie sämtliche Tasten der Eingabezeile. Die Liste bleibt also auch mit
+abgeschalteten Kürzeln vollständig bedienbar.
 
 | Taste | Aktion |
 |---|---|
@@ -102,7 +104,7 @@ Tag-Chips einer Zeile.
 | `Umschalt+W` | Nur wichtige anzeigen |
 | `Umschalt+D` | Design wechseln |
 | `Strg+Z` / `Strg+Umschalt+Z` | Rückgängig / Wiederherstellen |
-| `?` | Übersicht der Kürzel |
+| `?` | Übersicht aller Kürzel |
 
 In der Eingabezeile:
 

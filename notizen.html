@@ -2404,7 +2404,9 @@ function setPinned(id, pinned, toDay) {
   if (!pinned) carryOverPass(true);
   renderAll();
   focusRow(id, "cb");
-  announce(pinned ? "Bleibt am Ursprungstag." : "Wird wieder auf heute übernommen.");
+  var it = findItem(id);
+  announce(!pinned ? "Wird wieder auf heute übernommen."
+    : toDay ? "Bleibt am Ursprungstag." : "Wird nicht auf heute übernommen.");
 }
 function pullToToday(id) {
   var item = findItem(id);
@@ -2732,6 +2734,7 @@ function openRowMenu(anchor, id) {
     if (item.dayKey > ui.todayKey) add("Auf heute holen", function () { pullToToday(id); });
     else if (item.pinned) add("Wieder mitnehmen", function () { setPinned(id, false); });
     else if (item.dayKey !== item.createdDayKey) add("Am Ursprungstag lassen", function () { setPinned(id, true, item.createdDayKey); });
+    else if (!item.done) add("Nicht mitnehmen", function () { setPinned(id, true); });
     add("Löschen", function () { deleteItem(id); });
   }, { label: "Weitere Aktionen", role: "menu" });
 }
@@ -2776,7 +2779,8 @@ var SHORTCUTS = [
     ["?", "Diese Übersicht"]]],
   ["Eingabezeile", [["Eingabe", "Anlegen"], ["Umschalt+Eingabe", "Neue Zeile"],
     ["Strg+Eingabe", "Anlegen und als wichtig markieren"], ["Esc", "Feld leeren, nochmal Esc verlässt es"]]],
-  ["Liste", [["↑ ↓", "Voriger / nächster Eintrag"], ["← →", "Innerhalb der Zeile"],
+  ["Liste", [["↑ ↓", "Voriger / nächster Eintrag"], ["j k", "Dasselbe, ohne die Hand zu bewegen"],
+    ["← →", "Innerhalb der Zeile"],
     ["Alt+↑ Alt+↓", "Voriger / nächster Tag"], ["Pos1 Ende", "Erster / letzter Eintrag des Tages"],
     ["Strg+Pos1 Strg+Ende", "Erster / letzter Eintrag insgesamt"], ["Bild↑ Bild↓", "Zehn Einträge"],
     ["Leertaste", "Erledigt umschalten"], ["Eingabe oder F2", "Bearbeiten"],
@@ -2785,7 +2789,9 @@ var SHORTCUTS = [
 function openShortcuts() {
   openModal(function (box) {
     box.appendChild(el("h2", null, "Tastenkürzel"));
-    box.appendChild(el("p", null, "Einzeltasten wirken nur, wenn kein Textfeld den Fokus hat."));
+    box.appendChild(el("p", null, "Einzeltasten wirken nur, wenn kein Textfeld den Fokus hat. " +
+      "Der Schalter „Tastenkürzel aktiv“ im Menü schaltet sie ab; Pfeile, Pos1, Ende, " +
+      "Bild auf, Bild ab, Leertaste, Eingabe, F2 und Entf bleiben davon unberührt."));
     var dl = el("dl", "keys");
     SHORTCUTS.forEach(function (grp) {
       dl.appendChild(el("h4", null, grp[0]));
@@ -3139,13 +3145,19 @@ function inTextField() {
   if (a.tagName === "INPUT") return !!TEXT_INPUT_TYPES[(a.type || "text").toLowerCase()];
   return false;
 }
-function shortcutsAllowed(e) {
-  if (!state || !state.settings.shortcuts) return false;
+/* Kontext-Prüfung: gilt für JEDE Taste, unabhängig von der Einstellung. */
+function keysAllowed(e) {
+  if (!state) return false;
   if (e.ctrlKey || e.altKey || e.metaKey) return false;
   if (e.isComposing) return false;
   if (openModalNode || ui.openPopover) return false;
   if (inTextField()) return false;
   return true;
+}
+/* Zusätzlich: sind einzelne Schriftzeichen als Kürzel erlaubt?
+   Navigations- und Bearbeitungstasten fragen das absichtlich NICHT ab. */
+function singleKeysAllowed() {
+  return !!(state && state.settings.shortcuts);
 }
 
 function onKeydown(e) {
@@ -3175,7 +3187,8 @@ function onKeydown(e) {
     moveTo(e.key === "Home" ? 0 : visibleCbs().length - 1);
     return;
   }
-  if (!shortcutsAllowed(e)) return;
+  if (!keysAllowed(e)) return;
+  var einzeltasten = singleKeysAllowed();
 
   /* Auf einem Knopf oder Chip gehören Eingabe und Leertaste dem Knopf. */
   var ae = document.activeElement;
@@ -3190,7 +3203,7 @@ function onKeydown(e) {
      Namen wie "ArrowDown" sind länger als ein Zeichen und bleiben unberührt. */
   var key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
 
-  switch (key) {
+  if (einzeltasten) switch (key) {
     case "n":
       e.preventDefault(); document.getElementById("composer").focus(); return;
     case "/":
@@ -3216,8 +3229,10 @@ function onKeydown(e) {
   if (!inRow) return;
 
   switch (key) {
-    case "ArrowDown": case "j": e.preventDefault(); moveTo(i + 1); break;
-    case "ArrowUp":   case "k": e.preventDefault(); moveTo(i - 1); break;
+    case "ArrowDown": e.preventDefault(); moveTo(i + 1); break;
+    case "ArrowUp":   e.preventDefault(); moveTo(i - 1); break;
+    case "j": if (einzeltasten) { e.preventDefault(); moveTo(i + 1); } break;
+    case "k": if (einzeltasten) { e.preventDefault(); moveTo(i - 1); } break;
     case "PageDown": e.preventDefault(); moveTo(i + 10); break;
     case "PageUp":   e.preventDefault(); moveTo(i - 10); break;
     case "Home": case "End": {
@@ -3244,7 +3259,7 @@ function onKeydown(e) {
       break;
     }
     case "Enter": case "F2": e.preventDefault(); startEdit(id); break;
-    case "w": e.preventDefault(); toggleImportant(id); break;
+    case "w": if (einzeltasten) { e.preventDefault(); toggleImportant(id); } break;
     case "Delete": e.preventDefault(); deleteItem(id); break;
   }
 }
