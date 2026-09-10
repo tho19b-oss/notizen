@@ -10,8 +10,19 @@ weiterhin, von wann es ursprünglich stammt.
 
 ## Loslegen
 
+Zwei Wege, beide ohne Installation.
+
+**Lokal**, empfohlen für den Arbeitsrechner:
+
 1. `notizen.html` herunterladen.
 2. Doppelklick. Fertig.
+
+**Im Browser**, praktisch fürs Handy: <https://tho19b-oss.github.io/notizen/>
+
+Beide führen dieselbe App aus, teilen sich aber **keine Daten**. Browser trennen
+den Speicher nach Adresse, eine lokale Datei und eine Webadresse sind zwei
+verschiedene Ablagen. Wer beides nutzen will, überträgt die Notizen über
+**Daten exportieren** und **Daten importieren**.
 
 Es gibt nichts zu installieren und nichts einzurichten. Die App läuft in Chrome,
 Edge und Firefox. Erscheint oben ein roter Hinweis auf fehlenden Speicher, blockiert
@@ -188,6 +199,11 @@ Was daraus folgt:
 ## Am Code arbeiten
 
 Es gibt keinen Build-Schritt. Datei bearbeiten, im Browser neu laden, fertig.
+
+Im Repo liegen neben der App drei kleine Helfer für GitHub Pages: `index.html`
+leitet auf `notizen.html` weiter, damit die Wurzeladresse funktioniert und die
+Datei trotzdem einen sprechenden Namen behält. `.nojekyll` sagt Pages, die Dateien
+unverändert auszuliefern. `.gitignore` hält exportierte Sicherungen aus dem Repo.
 
 `notizen.html` ist in 21 nummerierte Abschnitte gegliedert, die im Quelltext als
 Kommentarblöcke markiert sind. Die tragenden sind:
