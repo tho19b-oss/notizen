@@ -52,6 +52,32 @@ lokalen Webserver auszuliefern statt sie direkt zu öffnen.
 - **Hell, dunkel oder Systemeinstellung**, umschaltbar über das Symbol in der Kopfzeile.
 - **Vollständig über die Tastatur bedienbar**, mit Live-Ansagen für Vorlesesoftware.
 
+## Wie es aussieht
+
+Ein **linierter Collegeblock**. Jeder Tag ist ein eigenes Blatt: cremefarbenes
+Papier, blaue Linierung, rote Randlinie, Lochung am linken Rand und eine
+angedeutete Abrisskante oben. Die Kästchen zum Abhaken stehen im Rand, links der
+roten Linie, wie man es auf Papier auch machen würde.
+
+**Was du schreibst, sieht handschriftlich aus.** Die Einträge stehen in *Ink Free*,
+der Handschrift von Windows, in Tintenblau und sitzen auf den Linien. Zurück fällt
+die App auf Segoe Print, Segoe Script und zuletzt Comic Sans, falls Ink Free fehlt.
+Eine Schrift wird **nicht** mitgeliefert, die Datei bleibt ohne Fremdbestandteile.
+
+Alles, was Bedienelement ist, bleibt gedruckt und klar lesbar: Tagesdatum, Zähler,
+Suche, Filter, Tag-Chips und Abzeichen. Das ist Absicht, denn eine ganze
+Arbeitswoche in Schreibschrift liest sich nach zwei Stunden nicht mehr gut.
+
+Abends wird aus dem Papier ein **dunkler Block**: dunkelgrauer Karton, gedämpfte
+blaue Linien, helle Tinte. Die Systemeinstellung schaltet automatisch um, das
+Symbol in der Kopfzeile erzwingt hell oder dunkel.
+
+**Das Raster ist die tragende Regel des Layouts.** Eine Zeile ist genau
+`--line` hoch, voreingestellt 26 Pixel, und die Tagesüberschrift belegt genau
+zwei Zeilen. Jedes Element auf dem Blatt muss ein Vielfaches davon hoch sein,
+sonst verrutscht die Schrift gegenüber der Linierung. Wer am CSS etwas ändert,
+prüft danach am besten, ob jede Zeile weiterhin ohne Rest auf dem Raster sitzt.
+
 ## Übernahme auf heute
 
 Das ist der Kern der App. Ein offener Eintrag von gestern steht am nächsten Morgen
@@ -167,9 +193,9 @@ mindestens einen Buchstaben. `#2026` wird deshalb keiner. Eine Adresse wie
 `https://intra.de/seite#anker` ebenfalls nicht, und `C#` auch nicht. Höchstens
 zwölf Tags pro Eintrag, höchstens 32 Zeichen je Tag.
 
-Wichtige Einträge bekommen einen Balken am linken Rand, etwas mehr Schriftstärke und
-einen gefüllten Stern. Drei Kanäle, weil Schriftstärke allein unter Windows 10
-manchmal wirkungslos bleibt.
+Wichtige Einträge bekommen einen kurzen Strich direkt an der roten Randlinie,
+kräftigere Schrift und einen gefüllten Stern. Drei Kanäle, weil Schriftstärke
+allein unter Windows 10 manchmal wirkungslos bleibt.
 
 ## Tastenkürzel
 
@@ -316,7 +342,8 @@ leitet auf `notizen.html` weiter, damit die Wurzeladresse funktioniert und die
 Datei trotzdem einen sprechenden Namen behält. `.nojekyll` sagt Pages, die Dateien
 unverändert auszuliefern. `.gitignore` hält exportierte Sicherungen aus dem Repo.
 
-`notizen.html` ist in 21 nummerierte Abschnitte gegliedert, die im Quelltext als
+Der JavaScript-Teil von `notizen.html` ist in 21 nummerierte Abschnitte gegliedert,
+die im Quelltext als
 Kommentarblöcke markiert sind. Die tragenden sind:
 
 | Abschnitt | Inhalt |

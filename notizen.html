@@ -11,66 +11,80 @@
    Eine Datei. Kein Build. Kein Netz. Daten liegen in localStorage.
    ========================================================================= */
 
-/* ---------- 1. TOKENS · HELL ---------- */
+/* ---------- 1. TOKENS · HELL (Papier) ---------- */
 :root{
   color-scheme: light dark;
 
-  --bg:#F5F4F1;
-  --surface:#FFFFFF;
-  --surface-sunken:#EDEBE6;
-  --thumb:#FFFFFF;
-  --row-hover-card:#F6F5F2;
-  --row-hover-ground:#EDEBE6;
-  --row-active:#E7E5DF;
+  /* Schreibtisch und Blatt */
+  --bg:#DCD8CE;              /* Tisch, auf dem der Block liegt */
+  --surface:#FCFAF2;         /* Papier */
+  --surface-sunken:#EDE8DB;
+  --thumb:#FCFAF2;
+  --row-hover-card:#F7F1DF;
+  --row-hover-ground:#F7F1DF;
+  --row-active:#F0E8D2;
 
-  --border:#E4E1DA;
-  --border-strong:#D3CFC6;
-  --control-border:#8B877E;
+  /* Der Block selbst */
+  --rule:#C2D3E4;            /* blaue Linierung */
+  --margin-line:#D98C8C;     /* rote Randlinie */
+  --hole:#D3CDBF;            /* Lochung */
+  --perf:#CFC8B6;            /* Abrisskante */
 
-  --text-1:#1B1A17;
-  --text-2:#56524A;
-  --text-3:#6D685F;
+  --border:#E2DACA;
+  --border-strong:#CBC2AC;
+  --control-border:#8A8579;
 
-  --accent:#4B4ACB;
-  --accent-hover:#3F3EB8;
-  --accent-text:#3F3EB8;
-  --accent-soft:#ECECF9;
-  --accent-ring:rgba(75,74,203,.28);
-  --mark-bg:rgba(75,74,203,.16);
+  /* Gedruckte Bedienelemente */
+  --text-1:#23211C;
+  --text-2:#575247;
+  --text-3:#6B6558;
+
+  /* Tinte, nur für Geschriebenes */
+  --ink:#243A6B;
+  --ink-soft:#5C6D95;
+
+  --accent:#3A5BA0;
+  --accent-hover:#2F4C8C;
+  --accent-text:#2F4C8C;
+  --accent-soft:#E3EAF7;
+  --accent-ring:rgba(58,91,160,.28);
+  --mark-bg:rgba(232,196,92,.45);   /* Textmarker */
   --focus:var(--accent);
 
-  --check-fill:#3A3730;
-  --check-glyph:#FFFFFF;
-  --strike:#6D685F;
+  --check-fill:#243A6B;
+  --check-glyph:#FCFAF2;
+  --strike:#5C6D95;
 
-  --important-text:#96590A;
-  --important-bar:#B87519;
-  --important-soft:#FBF1E0;
+  --important-text:#9A5710;
+  --important-bar:#C87F22;
+  --important-soft:#F8EDD8;
 
-  --danger:#C0392F;
-  --danger-soft:#FBEDEC;
+  --danger:#B23A30;
+  --danger-soft:#F7E7E4;
 
   --shadow-card:
-    0 0 0 1px rgba(28,26,22,.05),
-    0 1px 2px rgba(28,26,22,.04),
-    0 8px 20px -10px rgba(28,26,22,.10);
+    0 0 0 1px rgba(60,50,30,.07),
+    0 1px 1px rgba(60,50,30,.06),
+    0 10px 22px -14px rgba(60,50,30,.30);
   --shadow-popover:
-    0 0 0 1px rgba(28,26,22,.06),
-    0 12px 32px -8px rgba(28,26,22,.20);
+    0 0 0 1px rgba(60,50,30,.09),
+    0 14px 34px -10px rgba(60,50,30,.34);
   --shadow-toast:
-    0 0 0 1px rgba(28,26,22,.06),
-    0 16px 40px -12px rgba(28,26,22,.22);
+    0 0 0 1px rgba(60,50,30,.09),
+    0 16px 40px -12px rgba(60,50,30,.36);
   --shadow-thumb:
-    0 1px 2px rgba(28,26,22,.10),
-    0 0 0 1px rgba(28,26,22,.04);
+    0 1px 2px rgba(60,50,30,.16),
+    0 0 0 1px rgba(60,50,30,.05);
   --shadow-composer-focus:
     0 0 0 1px var(--accent),
-    0 8px 24px -14px rgba(75,74,203,.45);
-  --shadow-pinned: 0 6px 10px -10px rgba(28,26,22,.40);
-  --scroll-thumb: rgba(28,26,22,.18);
+    0 8px 22px -14px rgba(58,91,160,.45);
+  --shadow-pinned: 0 6px 10px -10px rgba(60,50,30,.45);
+  --scroll-thumb: rgba(60,50,30,.22);
 
   --font-ui:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
   --font-small:"Segoe UI Variable Small","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  /* Handschrift für alles, was du selbst schreibst. */
+  --font-hand:"Ink Free","Segoe Print","Segoe Script","Comic Sans MS",cursive;
 
   --ease-out:cubic-bezier(.22,1,.36,1);
   --ease-inout:cubic-bezier(.4,0,.2,1);
@@ -81,47 +95,56 @@
   --content:680px;
   --chrome-h:108px;
   --pad:24px;
+
+  /* Das Raster des Blocks. Jede Zeile ist genau eine Linie hoch. */
+  --line:26px;
+  --kopf:52px;               /* zwei Linien für die Tagesüberschrift */
+  --randlinie:56px;          /* Abstand der roten Linie vom Blattrand */
 }
 
-/* ---------- 2. TOKENS · DUNKEL ----------
-   Keine Invertierung: kühler blaugrauer Grund, Karte heller als der Grund,
-   Mulde dunkler, Akzent angehoben und entsättigt, Tiefe über Kanten statt Schatten. */
+/* ---------- 2. TOKENS · DUNKEL (schwarzer Block) ----------
+   Kein invertiertes Papier: dunkelgrauer Karton, hellere Linien, helle Tinte. */
+:root[data-theme="dunkel"], :root[data-theme="dunkel"] *{ }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="hell"]){
-    --bg:#15161A; --surface:#1E1F24; --surface-sunken:#0E0F12; --thumb:#2E3038;
-    --row-hover-card:#26272D; --row-hover-ground:#1E1F24; --row-active:#2C2E35;
-    --border:#2C2D34; --border-strong:#3B3D45; --control-border:#71737C;
-    --text-1:#E9E8E4; --text-2:#A6A39B; --text-3:#8B8880;
-    --accent:#8E8CF2; --accent-hover:#A09EF6; --accent-text:#A9A7F8; --accent-soft:#23233A;
-    --accent-ring:rgba(142,140,242,.36); --mark-bg:rgba(142,140,242,.22); --focus:var(--accent-text);
-    --check-fill:#D8D5CE; --check-glyph:#16171A; --strike:#8B8880;
+    --bg:#101114; --surface:#22242A; --surface-sunken:#191B20; --thumb:#2C2F37;
+    --row-hover-card:#292C34; --row-hover-ground:#292C34; --row-active:#31343D;
+    --rule:#333D4B; --margin-line:#7A4A4A; --hole:#131418; --perf:#343740;
+    --border:#2E3138; --border-strong:#3D414A; --control-border:#767A84;
+    --text-1:#E6E4DE; --text-2:#A8A49B; --text-3:#8C887F;
+    --ink:#CCD8F0; --ink-soft:#8B99B8;
+    --accent:#8CA6E0; --accent-hover:#A2B6E8; --accent-text:#A9BDEE; --accent-soft:#232A3A;
+    --accent-ring:rgba(140,166,224,.36); --mark-bg:rgba(224,180,80,.30); --focus:var(--accent-text);
+    --check-fill:#CCD8F0; --check-glyph:#1A1C22; --strike:#8B99B8;
     --important-text:#E0A94E; --important-bar:#E0A94E; --important-soft:#2A2419;
     --danger:#E58B82; --danger-soft:#2C1C1B;
-    --shadow-card:0 0 0 1px #2C2D34,0 10px 28px -16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.035);
-    --shadow-popover:0 0 0 1px #3B3D45,0 16px 40px -12px rgba(0,0,0,.7);
-    --shadow-toast:0 0 0 1px #3B3D45,0 16px 40px -12px rgba(0,0,0,.75);
-    --shadow-thumb:0 1px 2px rgba(0,0,0,.45);
-    --shadow-composer-focus:0 0 0 1px var(--accent),0 6px 16px -14px rgba(142,140,242,.5);
-    --shadow-pinned:0 6px 10px -10px rgba(0,0,0,.8);
+    --shadow-card:0 0 0 1px #2E3138,0 10px 26px -16px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.03);
+    --shadow-popover:0 0 0 1px #3D414A,0 16px 40px -12px rgba(0,0,0,.75);
+    --shadow-toast:0 0 0 1px #3D414A,0 16px 40px -12px rgba(0,0,0,.8);
+    --shadow-thumb:0 1px 2px rgba(0,0,0,.5);
+    --shadow-composer-focus:0 0 0 1px var(--accent),0 6px 16px -14px rgba(140,166,224,.5);
+    --shadow-pinned:0 6px 10px -10px rgba(0,0,0,.85);
     --scroll-thumb:rgba(255,255,255,.16);
   }
 }
 :root[data-theme="dunkel"]{
-  --bg:#15161A; --surface:#1E1F24; --surface-sunken:#0E0F12; --thumb:#2E3038;
-  --row-hover-card:#26272D; --row-hover-ground:#1E1F24; --row-active:#2C2E35;
-  --border:#2C2D34; --border-strong:#3B3D45; --control-border:#71737C;
-  --text-1:#E9E8E4; --text-2:#A6A39B; --text-3:#8B8880;
-  --accent:#8E8CF2; --accent-hover:#A09EF6; --accent-text:#A9A7F8; --accent-soft:#23233A;
-  --accent-ring:rgba(142,140,242,.36); --mark-bg:rgba(142,140,242,.22); --focus:var(--accent-text);
-  --check-fill:#D8D5CE; --check-glyph:#16171A; --strike:#8B8880;
+  --bg:#101114; --surface:#22242A; --surface-sunken:#191B20; --thumb:#2C2F37;
+  --row-hover-card:#292C34; --row-hover-ground:#292C34; --row-active:#31343D;
+  --rule:#333D4B; --margin-line:#7A4A4A; --hole:#131418; --perf:#343740;
+  --border:#2E3138; --border-strong:#3D414A; --control-border:#767A84;
+  --text-1:#E6E4DE; --text-2:#A8A49B; --text-3:#8C887F;
+  --ink:#CCD8F0; --ink-soft:#8B99B8;
+  --accent:#8CA6E0; --accent-hover:#A2B6E8; --accent-text:#A9BDEE; --accent-soft:#232A3A;
+  --accent-ring:rgba(140,166,224,.36); --mark-bg:rgba(224,180,80,.30); --focus:var(--accent-text);
+  --check-fill:#CCD8F0; --check-glyph:#1A1C22; --strike:#8B99B8;
   --important-text:#E0A94E; --important-bar:#E0A94E; --important-soft:#2A2419;
   --danger:#E58B82; --danger-soft:#2C1C1B;
-  --shadow-card:0 0 0 1px #2C2D34,0 10px 28px -16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.035);
-  --shadow-popover:0 0 0 1px #3B3D45,0 16px 40px -12px rgba(0,0,0,.7);
-  --shadow-toast:0 0 0 1px #3B3D45,0 16px 40px -12px rgba(0,0,0,.75);
-  --shadow-thumb:0 1px 2px rgba(0,0,0,.45);
-  --shadow-composer-focus:0 0 0 1px var(--accent),0 6px 16px -14px rgba(142,140,242,.5);
-  --shadow-pinned:0 6px 10px -10px rgba(0,0,0,.8);
+  --shadow-card:0 0 0 1px #2E3138,0 10px 26px -16px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.03);
+  --shadow-popover:0 0 0 1px #3D414A,0 16px 40px -12px rgba(0,0,0,.75);
+  --shadow-toast:0 0 0 1px #3D414A,0 16px 40px -12px rgba(0,0,0,.8);
+  --shadow-thumb:0 1px 2px rgba(0,0,0,.5);
+  --shadow-composer-focus:0 0 0 1px var(--accent),0 6px 16px -14px rgba(140,166,224,.5);
+  --shadow-pinned:0 6px 10px -10px rgba(0,0,0,.85);
   --scroll-thumb:rgba(255,255,255,.16);
 }
 @media (prefers-contrast: more){
@@ -234,20 +257,25 @@ body.is-scrolled .chrome{ box-shadow:0 1px 0 var(--border); }
 /* Zeile C — Composer */
 .composer{ position:relative; }
 .composer__card{
-  background:var(--surface); border-radius:14px; box-shadow:var(--shadow-card);
-  display:grid; grid-template-columns:18px 1fr auto; gap:10px; align-items:center;
-  padding:0 12px; min-height:48px;
+  background-color:var(--surface); border-radius:3px; box-shadow:var(--shadow-card);
+  background-image:linear-gradient(var(--rule), var(--rule));
+  background-repeat:no-repeat;
+  background-size:calc(100% - 32px) 1px;
+  background-position:16px 44px;
+  display:grid; grid-template-columns:18px 1fr auto; gap:12px; align-items:center;
+  padding:0 16px; min-height:52px;
   transition:box-shadow 160ms var(--ease-inout);
 }
 .composer__card.is-focus{ box-shadow:var(--shadow-card), var(--shadow-composer-focus); }
 .ghostbox{
-  width:18px; height:18px; border-radius:6px; border:1.5px dashed var(--control-border);
+  width:18px; height:18px; border-radius:4px; border:1.5px dashed var(--control-border);
   transition:border-color 160ms var(--ease-inout);
 }
 .composer__card.is-focus .ghostbox{ border-style:solid; border-color:var(--accent); }
 #composer{
-  border:0; background:none; resize:none; padding:13px 0; margin:0;
-  font-size:15px; line-height:22px; max-height:40vh; overflow-y:auto;
+  border:0; background:none; resize:none; padding:12px 0; margin:0;
+  font-family:var(--font-hand); font-size:18px; line-height:var(--line);
+  color:var(--ink); letter-spacing:0; max-height:40vh; overflow-y:auto;
 }
 #composer::placeholder{ color:var(--text-3); }
 .keycap{
@@ -287,32 +315,59 @@ body.is-scrolled .chrome{ box-shadow:0 1px 0 var(--border); }
 }
 .multiline button[aria-checked="true"]{ background:var(--accent-soft); color:var(--accent-text); }
 
-/* ---------- 5. TAGESLISTE ---------- */
+/* ---------- 5. DER BLOCK ----------
+   Jedes Blatt ist ein Tag. Die Linierung ist ein wiederholter Verlauf, der
+   genau unter der Tagesüberschrift beginnt. Damit die Zeilen darauf liegen,
+   muss ALLES im Blatt ein Vielfaches von --line hoch sein. */
 main{ display:block; padding-top:20px; }
-.days{ display:flex; flex-direction:column; gap:24px; }
+.days{ display:flex; flex-direction:column; gap:26px; }
 
-/* Kein overflow/transform/filter auf einem Vorfahren eines sticky-Headers. */
-.day{ position:relative; }
-.day--today{ background:var(--surface); border-radius:14px; box-shadow:var(--shadow-card); padding:8px 8px 10px; }
-.day--today::before{
-  content:""; position:absolute; inset:0 0 auto 0; height:2px; border-radius:14px 14px 0 0;
-  background:linear-gradient(90deg,var(--accent),transparent 70%);
+.day{
+  position:relative;
+  padding:0 22px 18px 64px;
+  border-radius:3px 3px 5px 5px;
+  background-color:var(--surface);
+  background-image:
+    linear-gradient(var(--margin-line), var(--margin-line)),
+    repeating-linear-gradient(to bottom,
+      transparent 0, transparent calc(var(--line) - 1px),
+      var(--rule) calc(var(--line) - 1px), var(--rule) var(--line));
+  background-repeat:no-repeat, repeat;
+  background-size:1px calc(100% - var(--kopf)), 100% 100%;
+  background-position:var(--randlinie) var(--kopf), 0 var(--kopf);
+  box-shadow:var(--shadow-card);
 }
-.day--past{ padding:0 8px; }
+/* Lochung am linken Rand */
+.day::before{
+  content:""; position:absolute; left:0; top:var(--kopf); bottom:10px; width:34px;
+  background-image:radial-gradient(circle at 17px 26px, var(--hole) 0 6px, transparent 6.5px);
+  background-size:34px 104px; background-repeat:repeat-y;
+  pointer-events:none;
+}
+/* Abrisskante oben */
+.day::after{
+  content:""; position:absolute; left:12px; right:12px; top:11px; height:2px;
+  background-image:radial-gradient(circle at 2px 1px, var(--perf) 0 1.1px, transparent 1.4px);
+  background-size:9px 2px; background-repeat:repeat-x;
+  pointer-events:none;
+}
+.day--today{ box-shadow:var(--shadow-card), 0 2px 0 -1px var(--accent-soft); }
+.day--past{ opacity:1; }
 
 .day__sentinel{ height:1px; margin-bottom:-1px; }
 .day__head{
-  position:sticky; top:calc(var(--chrome-h) - 1px); z-index:20;
-  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
-  height:34px; margin:0; padding:0 8px; border-radius:14px 14px 0 0;
+  position:sticky; top:calc(var(--chrome-h) - 1px); z-index:20; overflow:hidden;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+  height:var(--kopf); margin:0 -22px 0 -64px; padding:0 22px 5px 64px;
+  background:var(--surface);
   font-size:15px; line-height:20px; font-weight:600; letter-spacing:-.012em;
-  transition:box-shadow 180ms ease, border-color 180ms ease;
   border-bottom:1px solid transparent;
+  transition:box-shadow 180ms ease, border-color 180ms ease;
 }
 .day--today .day__head{ background:var(--surface); }
-.day--past .day__head{ background:var(--bg); }
-.day__head.is-pinned{ border-bottom-color:var(--border); box-shadow:var(--shadow-pinned); }
-.day__left{ display:flex; align-items:baseline; gap:6px; min-width:0; }
+.day--past .day__head{ background:var(--surface); }
+.day__head.is-pinned{ border-bottom-color:var(--rule); box-shadow:var(--shadow-pinned); }
+.day__left{ display:flex; align-items:baseline; gap:6px; min-width:0; white-space:nowrap; overflow:hidden; }
 .day__date{ font-size:13px; line-height:20px; font-weight:400; letter-spacing:0; color:var(--text-2); font-variant-numeric:tabular-nums; }
 .day__dot{ color:var(--text-3); font-weight:400; }
 .pill{
@@ -329,35 +384,39 @@ main{ display:block; padding-top:20px; }
 
 .ghostday{
   font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
-  letter-spacing:.005em; color:var(--text-3); height:32px; display:flex; align-items:center;
-  padding:0 16px;
+  letter-spacing:.005em; color:var(--text-2); height:26px; display:flex; align-items:center;
+  padding:0 8px;
 }
 
-ul.rows{ list-style:none; margin:6px 0 0; padding:0; }
+ul.rows{ list-style:none; margin:0; padding:0; }
 
+/* Gruppentrenner: eine Zeile hoch, damit das Raster nicht verrutscht. */
 .groupdiv{
-  display:flex; align-items:center; gap:6px; height:28px; margin:6px 0;
-  border-radius:10px; background:var(--surface-sunken); padding:0 8px 0 12px;
+  display:flex; align-items:center; gap:6px; height:var(--line); margin:0;
+  padding:0 4px; width:100%; text-align:left; color:var(--text-3);
   font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
-  letter-spacing:.005em; color:var(--text-2); width:100%; text-align:left;
+  letter-spacing:.005em;
 }
-.groupdiv svg{ width:16px; height:16px; transition:transform 200ms var(--ease-out); }
+.groupdiv:hover{ color:var(--text-1); }
+.groupdiv svg{ width:14px; height:14px; transition:transform 200ms var(--ease-out); }
 .groupdiv[aria-expanded="false"] svg{ transform:rotate(-90deg); }
 
-/* Geplant: Einträge mit einem Datum in der Zukunft */
-.planned{ margin-bottom:24px; }
-.planned .groupdiv{ margin:0 0 6px; }
+/* Geplant ist ein loser Zettel über dem Block, ohne Linierung. */
+.planned{
+  position:relative; margin-bottom:26px;
+  padding:0 22px 14px 64px;
+  background:var(--surface); border-radius:3px; box-shadow:var(--shadow-card);
+}
+.planned .groupdiv{ height:var(--kopf); align-items:flex-end; padding-bottom:6px; }
 .planned__next{ margin-left:auto; margin-right:8px; color:var(--text-3); font-weight:400; }
 .planned__date{
-  font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
-  letter-spacing:.005em; color:var(--text-2); padding:8px 16px 2px;
+  font-family:var(--font-small); font-size:12px; line-height:var(--line); font-weight:500;
+  letter-spacing:.005em; color:var(--text-2); height:var(--line);
 }
-.planned ul.rows{ margin-top:0; padding:0 8px; }
-.planned .item:hover,.planned .item:focus-within{ background:var(--row-hover-ground); }
-.deferrow{
-  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
-  padding:6px 8px; margin:2px 0;
-}
+.planned ul.rows{ margin:0; padding:0; }
+.planned .item:hover,.planned .item:focus-within{ background:var(--row-hover-card); }
+
+.deferrow{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:6px 8px; margin:2px 0; }
 .deferrow__label{
   font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
   letter-spacing:.005em; color:var(--text-3);
@@ -369,52 +428,52 @@ ul.rows{ list-style:none; margin:6px 0 0; padding:0; }
   font-family:var(--font-small); font-size:12px; padding:0 4px; max-width:130px;
 }
 
-/* ---------- 6. ZEILE ---------- */
+/* ---------- 6. DIE ZEILE ----------
+   Kein Innenabstand und keine eigene Trennlinie: die Linierung des Blattes
+   übernimmt beides. Höhe immer ein Vielfaches von --line. */
 .item{
-  position:relative; display:grid; grid-template-columns:12px 20px minmax(0,1fr);
-  column-gap:10px; align-items:start; padding:10px 8px 10px 4px; min-height:44px;
-  border-radius:10px; background:transparent; scroll-margin-top:calc(var(--chrome-h) + 16px);
+  position:relative; min-height:var(--line);
+  background:transparent; border-radius:0;
+  scroll-margin-top:calc(var(--chrome-h) + 16px);
   transition:background-color 160ms linear;
 }
-.rows .item.sep::before{
-  content:""; position:absolute; left:56px; right:0; top:-1px; height:1px; background:var(--border);
+.day--today .item:hover,.day--today .item:focus-within,
+.day--past .item:hover,.day--past .item:focus-within{
+  background:var(--row-hover-card); transition-duration:90ms;
 }
-.day--today .item:hover,.day--today .item:focus-within{ background:var(--row-hover-card); transition-duration:90ms; }
-.day--past .item:hover,.day--past .item:focus-within{ background:var(--row-hover-ground); transition-duration:90ms; }
-.item.is-leaving{ box-shadow:inset 3px 0 0 -1px var(--border); }
+.item.is-leaving{ box-shadow:inset 3px 0 0 -1px var(--border-strong); }
 .item.moved{ background:var(--accent-soft); }
 .item.wash{ animation:wash 400ms var(--ease-out) 240ms both; }
 @keyframes wash{ from{background:var(--accent-soft)} to{background:transparent} }
 
+/* Wichtig-Markierung sitzt direkt an der roten Randlinie. */
 .rail{
-  grid-column:1; width:3px; margin:4px auto 4px 4px; border-radius:999px;
-  background:transparent; align-self:stretch; transform-origin:center;
+  position:absolute; left:-11px; top:5px; width:3px; height:16px;
+  border-radius:999px; background:transparent; transform-origin:center;
 }
 .item.important .rail{ background:var(--important-bar); }
 .item.important.rail-in .rail{ animation:railin 200ms var(--ease-out); }
 @keyframes railin{ from{transform:scaleY(0)} to{transform:scaleY(1)} }
 .item.important.done .rail{ background:var(--border-strong); transition:background-color 300ms var(--ease-inout); }
 
-.cbwrap{ grid-column:2; position:relative; width:20px; height:22px; }
+/* Das Kästchen steht im Rand, links der roten Linie. */
+.cbwrap{ position:absolute; left:-32px; top:0; width:20px; height:var(--line); }
 .cb{
-  appearance:none; -webkit-appearance:none; position:absolute; left:1px; top:2px; margin:0;
-  width:18px; height:18px; border:1.5px solid var(--control-border); border-radius:6px;
+  appearance:none; -webkit-appearance:none; position:absolute; left:1px; top:4px; margin:0;
+  width:18px; height:18px; border:1.5px solid var(--control-border); border-radius:4px;
   background:transparent; cursor:pointer;
   transition:background-color 140ms var(--ease-inout), border-color 140ms var(--ease-inout), transform 120ms var(--ease-inout);
 }
 .item:hover .cb,.cb:hover{ border-color:var(--accent); background:var(--accent-soft); transform:scale(1.06); }
 .cb:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
 .cb:checked{ background:var(--check-fill); border-color:var(--check-fill); transform:scale(1); }
-.cb::after{
-  content:""; position:absolute; inset:0; border-radius:6px;
-  box-shadow:0 0 0 0 var(--accent-ring); pointer-events:none;
-}
+.cb::after{ content:""; position:absolute; inset:0; border-radius:4px; box-shadow:0 0 0 0 var(--accent-ring); pointer-events:none; }
 .cb.ripple::after{ animation:ripple 420ms var(--ease-out); }
 @keyframes ripple{ from{box-shadow:0 0 0 0 var(--accent-ring)} to{box-shadow:0 0 0 10px transparent} }
 .cb.pop{ animation:pop 320ms var(--ease-pop); }
 @keyframes pop{ 0%{transform:scale(1)} 22%{transform:scale(.86)} 55%{transform:scale(1.08)} 100%{transform:scale(1)} }
 .cb-tick{
-  position:absolute; left:1px; top:2px; width:18px; height:18px; pointer-events:none;
+  position:absolute; left:1px; top:4px; width:18px; height:18px; pointer-events:none;
   fill:none; stroke:var(--check-glyph); stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
   stroke-dasharray:1; stroke-dashoffset:1;
   transition:stroke-dashoffset 220ms var(--ease-stroke) 70ms;
@@ -422,16 +481,22 @@ ul.rows{ list-style:none; margin:6px 0 0; padding:0; }
 .item.done .cb-tick{ stroke-dashoffset:0; }
 .item:not(.done) .cb-tick{ transition-duration:120ms; transition-delay:0ms; }
 
-.body{ grid-column:3; min-width:0; }
+/* Alles, was auf dem Blatt steht, ist Handschrift. */
+.body{
+  position:relative; top:3px;   /* die Schrift sitzt auf der Linie, nicht darüber */
+  min-width:0;
+  font-family:var(--font-hand); font-size:18px; line-height:var(--line);
+  color:var(--ink); letter-spacing:0;
+}
 .textflow{ display:inline; }
 .text{
-  display:inline; cursor:pointer; color:var(--text-1);
+  display:inline; cursor:pointer; color:inherit;
   white-space:pre-wrap; overflow-wrap:anywhere; hyphens:auto;
   background-image:linear-gradient(var(--strike),var(--strike));
-  background-repeat:no-repeat; background-position:0 60%; background-size:0% 2px;
+  background-repeat:no-repeat; background-position:0 62%; background-size:0% 2px;
   transition:background-size 240ms cubic-bezier(.2,.8,.2,1), color 420ms var(--ease-inout) 60ms;
 }
-.item.important .text{ font-weight:500; }
+.item.important .text{ font-weight:700; }
 .item.done .text{ color:var(--strike); }
 .item.done .text.is-single{ background-size:100% 2px; }
 .item.done .text.is-multi{
@@ -439,17 +504,15 @@ ul.rows{ list-style:none; margin:6px 0 0; padding:0; }
   text-decoration:line-through; text-decoration-thickness:2px;
   text-decoration-skip-ink:none; text-decoration-color:currentColor;
 }
-.text.retract{ background-position:100% 60%; }
-mark{
-  background:var(--mark-bg); color:inherit; border-radius:3px; padding:0 1px;
-  transition:background-color 120ms linear;
-}
+.text.retract{ background-position:100% 62%; }
+mark{ background:var(--mark-bg); color:inherit; border-radius:2px; padding:0 1px; transition:background-color 120ms linear; }
 
+/* Tags und Notizen am Rand bleiben gedruckt: sie sind Bedienelemente. */
 .chip{
-  display:inline-flex; align-items:center; height:18px; padding:1px 6px; border-radius:6px;
+  display:inline-flex; align-items:center; height:17px; padding:0 5px; border-radius:4px;
   background:var(--surface-sunken); color:var(--text-2);
-  font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
-  letter-spacing:.005em; vertical-align:1px; margin:0 1px; white-space:nowrap;
+  font-family:var(--font-small); font-size:11px; line-height:15px; font-weight:500;
+  letter-spacing:.005em; vertical-align:1px; margin:0 2px; white-space:nowrap;
   transition:background-color 120ms var(--ease-inout), color 120ms var(--ease-inout), filter 300ms var(--ease-inout);
 }
 .chip .hash{ color:var(--accent); opacity:.55; }
@@ -463,74 +526,66 @@ mark{
 .body a.link{
   color:var(--accent-text); text-decoration:underline;
   text-decoration-thickness:1px; text-underline-offset:2px;
-  overflow-wrap:anywhere; border-radius:3px;
+  overflow-wrap:anywhere; border-radius:2px;
 }
 .body a.link:hover{ background:var(--accent-soft); }
-.item.done .body a.link{ color:var(--text-3); }
+.item.done .body a.link{ color:var(--strike); }
 
 .day__copy{
-  width:24px; height:24px; flex:0 0 auto; margin-left:8px; border-radius:6px;
+  width:22px; height:22px; flex:0 0 auto; margin-left:8px; border-radius:5px;
   color:var(--text-3); display:inline-flex; align-items:center; justify-content:center;
   opacity:0; transition:opacity 120ms var(--ease-inout), background-color 120ms var(--ease-inout);
 }
 .day__copy svg{ width:15px; height:15px; }
 .day:hover .day__copy,.day__copy:focus-visible{ opacity:1; }
 .day__copy:hover{ background:var(--row-active); color:var(--text-1); }
-@media (pointer:coarse){ .day__copy{ opacity:.6; width:32px; height:32px; } }
+@media (pointer:coarse){ .day__copy{ opacity:.6; width:30px; height:30px; } }
 
 .meta{
-  display:inline; font-family:var(--font-small); font-size:12px; line-height:16px;
+  display:inline; font-family:var(--font-small); font-size:11px; line-height:15px;
   font-weight:500; letter-spacing:.005em; color:var(--text-3);
 }
 .badge{
-  display:inline-flex; align-items:center; height:18px; padding:1px 8px; border-radius:999px;
+  display:inline-flex; align-items:center; height:17px; padding:0 7px; border-radius:999px;
   background:var(--surface-sunken); color:var(--text-3); margin-left:6px; vertical-align:1px;
   white-space:nowrap;
 }
 .badge.old{ background:transparent; color:var(--text-2); border:1px solid var(--border-strong); }
 .donetime{ margin-left:6px; white-space:nowrap; }
 
-.actions{
-  position:absolute; right:6px; top:6px; display:flex; gap:2px; opacity:0;
-  transition:opacity 120ms var(--ease-inout);
-}
+.actions{ position:absolute; right:2px; top:0; display:flex; gap:0; opacity:0; transition:opacity 120ms var(--ease-inout); }
 .item:hover .actions,.item:focus-within .actions{ opacity:1; }
 .item.important .actions{ opacity:1; }
 .item.important:not(:hover):not(:focus-within) .act:not(.act--imp){ opacity:0; }
 .act{
-  width:28px; height:28px; border-radius:8px; color:var(--text-3);
+  width:var(--line); height:var(--line); border-radius:5px; color:var(--text-3);
   display:inline-flex; align-items:center; justify-content:center;
   transition:background-color 120ms var(--ease-inout), color 120ms var(--ease-inout), opacity 120ms var(--ease-inout);
 }
-.act svg{ width:16px; height:16px; }
+.act svg{ width:15px; height:15px; }
 .act:hover{ background:var(--row-active); color:var(--text-1); }
 .act--del:hover{ background:var(--danger-soft); color:var(--danger); }
 .item.important .act--imp{ color:var(--important-text); }
 .item.important .act--imp .star{ fill:currentColor; }
 
-/* Editor */
 .edit{
   width:100%; border:0; background:none; resize:none; padding:0; margin:0;
-  font-family:inherit; font-size:15px; line-height:22px; letter-spacing:-.005em;
-  color:var(--text-1); max-height:40vh; overflow-y:auto;
+  font-family:var(--font-hand); font-size:18px; line-height:var(--line); letter-spacing:0;
+  color:var(--ink); max-height:40vh; overflow-y:auto;
 }
 .edithint{
   display:block; font-family:var(--font-small); font-size:12px; line-height:16px;
-  font-weight:500; letter-spacing:.005em; color:var(--text-3); margin-top:6px;
+  font-weight:500; letter-spacing:.005em; color:var(--text-3); margin-top:4px;
 }
-.editbtns{ display:flex; align-items:center; gap:6px; margin-top:8px; }
-.editbtns button{ font-size:13px; font-weight:500; border-radius:8px; padding:4px 10px; }
+.editbtns{ display:flex; align-items:center; gap:6px; margin-top:6px; margin-bottom:6px; }
+.editbtns button{ font-family:var(--font-ui); font-size:13px; font-weight:500; border-radius:6px; padding:4px 10px; }
 .editbtns .primary{ background:var(--accent); color:#fff; }
 .editbtns .primary:hover{ background:var(--accent-hover); }
 .editbtns .ghost{ color:var(--text-2); }
 .editbtns .ghost:hover{ background:var(--row-active); color:var(--text-1); }
 .item.editing .actions{ display:none; }
-.charcount{
-  font-family:var(--font-small); font-size:12px; font-weight:500;
-  color:var(--text-3); margin-left:auto;
-}
+.charcount{ font-family:var(--font-small); font-size:12px; font-weight:500; color:var(--text-3); margin-left:auto; }
 
-/* Zeile ein- und ausblenden */
 .rowgrid{ display:grid; grid-template-rows:1fr; }
 .rowgrid > *{ min-height:0; }
 .rowgrid.enter{ animation:rowin 260ms var(--ease-out); }
@@ -543,7 +598,7 @@ mark{
 @keyframes rowfadeout{ to{ transform:translateX(6px); opacity:0 } }
 
 /* ---------- 7. LEERZUSTÄNDE, BANNER, TOAST, POPOVER ---------- */
-.empty{ padding:22px 16px 26px; }
+.empty{ padding:var(--line) 0 var(--line); }
 .empty--flat{ padding:40px 8px; }
 .empty__icon{ width:40px; height:40px; margin-bottom:14px; }
 .empty__icon rect{ fill:none; stroke:var(--control-border); stroke-width:1.5; stroke-dasharray:1; stroke-dashoffset:1; }
@@ -561,8 +616,8 @@ mark{
   border-radius:8px; padding:5px 10px; }
 .empty__btn:hover{ background:var(--accent-soft); }
 .alldone{
-  display:flex; align-items:flex-start; gap:10px; margin-top:10px; padding:12px 8px 4px;
-  border-top:1px solid var(--border);
+  display:flex; align-items:flex-start; gap:10px; margin-top:var(--line);
+  padding:0; min-height:var(--line);
 }
 .alldone svg{ width:20px; height:20px; flex:0 0 auto; margin-top:1px;
   fill:none; stroke:var(--check-fill); stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
@@ -699,13 +754,22 @@ footer .linkbtn{ font-family:var(--font-small); font-size:12px; }
   .wordmark{ order:1; } .spacer{ order:2; } .tbtn{ order:3; } .ibtn{ order:4; }
 }
 @media (max-width:520px){
-  :root{ --pad:12px; }
-  #composer{ font-size:16px; }
-  .day--today{ border-radius:12px; }
-  .item{ padding:12px 8px; min-height:48px; }
+  :root{ --pad:12px; --randlinie:40px; }
+  .day{ padding:0 12px 16px 48px; }
+  .day__head{ margin:0 -12px 0 -48px; padding:0 12px 5px 48px; }
+  .day::before{
+    width:26px;
+    background-image:radial-gradient(circle at 13px 26px, var(--hole) 0 5px, transparent 5.5px);
+    background-size:26px 104px;
+  }
+  .planned{ padding:0 12px 14px 48px; }
+  .cbwrap{ left:-28px; }
+  .rail{ left:-9px; }
   .actions{ opacity:.6; }
   .act:not(.act--menu){ display:none; }
-  .body{ padding-right:34px; }
+  .body{ padding-right:28px; }
+  .day__count{ min-width:0; }
+  .day__head{ font-size:14px; }
 }
 @media (pointer:coarse){
   .ibtn,.act{ width:40px; height:40px; }
@@ -807,13 +871,9 @@ footer .linkbtn{ font-family:var(--font-small); font-size:12px; }
 
 <style>
 /* Nachtrag: Aktionsleiste muss langen Text sauber überdecken, Designwechsel ist ein Waschgang. */
-.day--today .item:hover .actions,.day--today .item:focus-within .actions{
-  background:var(--row-hover-card); border-radius:8px;
+.item:hover .actions,.item:focus-within .actions{
+  background:var(--row-hover-card); border-radius:5px;
   box-shadow:-14px 0 12px -8px var(--row-hover-card);
-}
-.day--past .item:hover .actions,.day--past .item:focus-within .actions{
-  background:var(--row-hover-ground); border-radius:8px;
-  box-shadow:-14px 0 12px -8px var(--row-hover-ground);
 }
 .theme-anim *,.theme-anim *::before,.theme-anim *::after{
   transition:background-color 180ms var(--ease-inout), border-color 180ms var(--ease-inout),
