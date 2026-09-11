@@ -460,6 +460,24 @@ mark{
 @keyframes bump{ 0%{transform:scale(1)} 50%{transform:scale(1.06)} 100%{transform:scale(1)} }
 .item.done .chip{ filter:saturate(.2); background:transparent; color:var(--text-3); }
 
+.body a.link{
+  color:var(--accent-text); text-decoration:underline;
+  text-decoration-thickness:1px; text-underline-offset:2px;
+  overflow-wrap:anywhere; border-radius:3px;
+}
+.body a.link:hover{ background:var(--accent-soft); }
+.item.done .body a.link{ color:var(--text-3); }
+
+.day__copy{
+  width:24px; height:24px; flex:0 0 auto; margin-left:8px; border-radius:6px;
+  color:var(--text-3); display:inline-flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 120ms var(--ease-inout), background-color 120ms var(--ease-inout);
+}
+.day__copy svg{ width:15px; height:15px; }
+.day:hover .day__copy,.day__copy:focus-visible{ opacity:1; }
+.day__copy:hover{ background:var(--row-active); color:var(--text-1); }
+@media (pointer:coarse){ .day__copy{ opacity:.6; width:32px; height:32px; } }
+
 .meta{
   display:inline; font-family:var(--font-small); font-size:12px; line-height:16px;
   font-weight:500; letter-spacing:.005em; color:var(--text-3);
@@ -604,6 +622,16 @@ mark{
   stroke-linecap:round; stroke-linejoin:round; }
 .popitem:not([aria-checked="true"]) .box svg,.menuitem:not([aria-checked="true"]) .box svg{ display:none; }
 .pop__sep{ height:1px; background:var(--border); margin:8px 0; }
+.trashrow{
+  display:flex; align-items:center; gap:12px; padding:8px 4px;
+  border-top:1px solid var(--border);
+}
+.trashrow:first-child{ border-top:0; }
+.trashrow__text{ min-width:0; flex:1 1 auto; font-size:13px; line-height:18px; overflow-wrap:anywhere; }
+.trashrow__meta{
+  font-family:var(--font-small); font-size:12px; line-height:16px; font-weight:500;
+  letter-spacing:.005em; color:var(--text-3); margin-top:2px;
+}
 .pop__foot{ display:flex; }
 
 .menuitem{
@@ -631,6 +659,11 @@ mark{
 }
 .modal h2{ font-size:17px; line-height:23px; font-weight:600; letter-spacing:-.012em; margin:0 0 4px; }
 .modal p{ font-size:13px; line-height:20px; color:var(--text-2); margin:0 0 14px; }
+.jumpdate{
+  height:36px; border:1px solid var(--border-strong); border-radius:8px;
+  background:var(--surface-sunken); color:var(--text-1);
+  font-size:15px; padding:0 10px; width:100%; max-width:220px;
+}
 .modal textarea{
   width:100%; height:220px; border:1px solid var(--border-strong); border-radius:10px;
   background:var(--surface-sunken); font-family:ui-monospace,Consolas,"Courier New",monospace;
@@ -826,7 +859,8 @@ var ICONS = {
   sun:     '<circle cx="10" cy="10" r="3.4"/><path d="M10 2.4v1.8M10 15.8v1.8M2.4 10h1.8M15.8 10h1.8M4.6 4.6l1.3 1.3M14.1 14.1l1.3 1.3M15.4 4.6l-1.3 1.3M5.9 14.1l-1.3 1.3"/>',
   moon:    '<path d="M16.4 12.3A6.6 6.6 0 017.7 3.6a5.6 5.6 0 108.7 8.7z"/>',
   monitor: '<rect x="2.8" y="4.2" width="14.4" height="9.4" rx="1.6"/><path d="M7 17h6M10 13.6V17"/>',
-  x:       '<path d="M6 6l8 8M14 6l-8 8"/>'
+  x:       '<path d="M6 6l8 8M14 6l-8 8"/>',
+  copy:    '<rect x="7.2" y="7.2" width="9.6" height="9.6" rx="2"/><path d="M13 4.4H5.2a1.8 1.8 0 00-1.8 1.8V13"/>'
 };
 function icon(name, size) {
   var wrap = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -918,6 +952,30 @@ function nextWeekdayKey(fromKey, weekday) {
   var delta = (weekday - d.getDay() + 7) % 7;
   if (delta === 0) delta = 7;
   return shiftDayKey(fromKey, delta);
+}
+var REPEAT_LABEL = { taeglich: "täglich", werktags: "werktags",
+                     woechentlich: "wöchentlich", monatlich: "monatlich" };
+var REPEAT_KINDS = ["taeglich", "werktags", "woechentlich", "monatlich"];
+/* Der nächste Termin einer Wiederholung, ausgehend von einem Tag. */
+function nextRepeatKey(kind, fromKey) {
+  var d = dateFromDayKey(fromKey);
+  if (kind === "taeglich") return shiftDayKey(fromKey, 1);
+  if (kind === "woechentlich") return shiftDayKey(fromKey, 7);
+  if (kind === "werktags") {
+    var k = shiftDayKey(fromKey, 1), n = 0;
+    while (n++ < 7) {
+      var wt = dateFromDayKey(k).getDay();
+      if (wt !== 0 && wt !== 6) return k;
+      k = shiftDayKey(k, 1);
+    }
+    return k;
+  }
+  if (kind === "monatlich") {
+    /* Der 31. im Februar wird zum letzten Februartag, statt in den März zu rutschen. */
+    var letzter = new Date(d.getFullYear(), d.getMonth() + 2, 0).getDate();
+    return dayKeyOf(new Date(d.getFullYear(), d.getMonth() + 1, Math.min(d.getDate(), letzter)));
+  }
+  return null;
 }
 function badgeLabel(originKey, todayKey) {
   var n = dayDiff(originKey, todayKey);
@@ -1066,6 +1124,33 @@ function tagsOf(text) {
   }
   return out;
 }
+/* Adressen im Text. Bewusst eng gefasst: nur http, https und www.
+   Der Verweis wird NIE aus beliebigem Text zusammengesetzt, sondern aus einem
+   Treffer, der zwingend mit einem dieser drei Anfänge beginnt, und danach noch
+   einmal über URL() auf das Schema geprüft. */
+var URL_LEAD = "(^|[\\s(\\[{\"'\u201E\u00AB\u201A<])";
+var URL_BODY = "((?:https?:\\/\\/|www\\.)[^\\s<>\"'\u201C\u201D\u00BB\u00AB]+)";
+function parseUrls(text) {
+  var re = new RegExp(URL_LEAD + URL_BODY, "gi"), m, out = [];
+  while ((m = re.exec(text)) !== null) {
+    var roh = m[2];
+    var start = m.index + m[1].length;
+    var t = roh.replace(/[.,;:!?\u201C\u201D\u00BB"\u2019']+$/, "");
+    while (/[)\]}]$/.test(t)) {
+      var zu = t.slice(-1), auf = zu === ")" ? "(" : zu === "]" ? "[" : "{";
+      if (t.split(auf).length >= t.split(zu).length) break;
+      t = t.slice(0, -1);
+    }
+    if (t.length < 8) continue;
+    var href = /^www\./i.test(t) ? "https://" + t : t;
+    var ok = false;
+    try { var u = new URL(href); ok = (u.protocol === "http:" || u.protocol === "https:"); } catch (e) { ok = false; }
+    if (!ok) continue;
+    out.push({ type: "url", start: start, end: start + t.length, href: href });
+  }
+  return out;
+}
+
 /* Ein alleinstehendes ! markiert als wichtig und wird aus dem Text entfernt. */
 function extractBang(text) {
   if (!/(^|\s)!(?=\s|$)/.test(text)) return { text: text, important: false };
@@ -1207,7 +1292,11 @@ function normalise(obj, todayKey) {
     var cutoff = Date.now() - 30 * 86400000;
     out.tombstones = obj.tombstones.filter(function (t) {
       return t && typeof t.id === "string" && typeof t.deletedAt === "number" && t.deletedAt > cutoff;
-    }).slice(0, 5000);
+    }).map(function (t) {
+      var k = { id: t.id, deletedAt: t.deletedAt };
+      if (t.item && typeof t.item === "object" && typeof t.item.text === "string") k.item = t.item;
+      return k;
+    }).slice(-300);
   }
 
   var repairs = 0, ids = Object.create(null), maxSeq = 0;
@@ -1247,6 +1336,7 @@ function normalise(obj, todayKey) {
       seq: seq,
       carryCount: (typeof r.carryCount === "number" && isFinite(r.carryCount)) ? r.carryCount : 0,
       deferred: !!r.deferred,
+      repeat: REPEAT_KINDS.indexOf(r.repeat) >= 0 ? r.repeat : null,
       tags: tagsOf(r.text)
     });
   }
@@ -1679,20 +1769,44 @@ function buildTextFlow(item, cbId) {
     appendSlice(lab, text, from, to, hits);
     flow.appendChild(lab);
   }
-  for (var i = 0; i < tags.length; i++) {
-    var t = tags[i];
-    fragment(pos, t.start);
-    var chip = el("button", "chip");
-    chip.type = "button";
-    chip.dataset.tag = t.key;
-    chip.dataset.fr = "chip";
-    chip.tabIndex = -1;
-    chip.setAttribute("aria-pressed", active.indexOf(t.key) >= 0 ? "true" : "false");
-    chip.setAttribute("aria-label", "Nach Tag " + t.label + " filtern");
-    chip.appendChild(el("span", "hash", "#"));
-    appendSlice(chip, text, t.start + 1, t.end, hits);
-    flow.appendChild(chip);
-    pos = t.end;
+  /* Tags und Adressen in eine gemeinsame, überschneidungsfreie Folge bringen. */
+  var spezial = tags.map(function (t) { return { type: "tag", start: t.start, end: t.end, tag: t }; })
+    .concat(parseUrls(text));
+  spezial.sort(function (a, b) { return a.start - b.start || a.end - b.end; });
+  var gefiltert = [];
+  for (var g = 0; g < spezial.length; g++) {
+    if (gefiltert.length && spezial[g].start < gefiltert[gefiltert.length - 1].end) continue;
+    gefiltert.push(spezial[g]);
+  }
+
+  for (var i = 0; i < gefiltert.length; i++) {
+    var sp = gefiltert[i];
+    fragment(pos, sp.start);
+    if (sp.type === "tag") {
+      var t = sp.tag;
+      var chip = el("button", "chip");
+      chip.type = "button";
+      chip.dataset.tag = t.key;
+      chip.dataset.fr = "chip";
+      chip.tabIndex = -1;
+      chip.setAttribute("aria-pressed", active.indexOf(t.key) >= 0 ? "true" : "false");
+      chip.setAttribute("aria-label", "Nach Tag " + t.label + " filtern");
+      chip.appendChild(el("span", "hash", "#"));
+      appendSlice(chip, text, t.start + 1, t.end, hits);
+      flow.appendChild(chip);
+    } else {
+      var a = document.createElement("a");
+      a.className = "link";
+      a.href = sp.href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer nofollow";
+      a.title = sp.href;
+      a.tabIndex = -1;
+      a.dataset.fr = "link";
+      appendSlice(a, text, sp.start, sp.end, hits);
+      flow.appendChild(a);
+    }
+    pos = sp.end;
   }
   fragment(pos, text.length);
   if (!flow.firstChild) fragment(0, text.length);
@@ -1722,6 +1836,11 @@ function buildMeta(item) {
     var pin = el("span", "badge", "angeheftet");
     pin.title = "Bleibt an seinem Ursprungstag.";
     meta.appendChild(pin);
+  }
+  if (item.repeat) {
+    var rb = el("span", "badge", REPEAT_LABEL[item.repeat]);
+    rb.title = "Wiederholt sich " + REPEAT_LABEL[item.repeat] + ". Beim Abhaken entsteht der nächste Termin.";
+    meta.appendChild(rb);
   }
   if (item.done && item.doneAt) {
     var txt = (item.doneDayKey && item.doneDayKey !== item.dayKey)
@@ -1834,6 +1953,16 @@ function renderDayHead(sec) {
   }
   h.appendChild(left);
   h.appendChild(el("span", "day__count", dayCounter(sec)));
+  var copy = el("button", "day__copy");
+  copy.type = "button";
+  copy.title = "Tag als Text kopieren";
+  copy.setAttribute("aria-label", fmtLong(sec.key) + " als Text kopieren");
+  copy.appendChild(icon("copy"));
+  copy.addEventListener("click", function (e) {
+    e.stopPropagation();
+    copyText(dayAsText(sec.key), fmtLong(sec.key) + " kopiert");
+  });
+  h.appendChild(copy);
   return h;
 }
 
@@ -1915,6 +2044,39 @@ function renderPlanned(planned) {
     wrap.appendChild(makeRows(g.rows));
   });
   return wrap;
+}
+
+/* Einen Tag als Klartext für Mail oder Protokoll. */
+function dayAsText(dayKey) {
+  var rows = state.items.filter(function (i) { return i.dayKey === dayKey; }).slice().sort(compareItems);
+  var offen = rows.filter(function (i) { return !i.done; });
+  var fertig = rows.filter(function (i) { return i.done; });
+  function zeile(i) {
+    return "- " + i.text.replace(/\s*\n\s*/g, " ") + (i.important ? " (wichtig)" : "");
+  }
+  var out = [fmtLongFull(dayKey), ""];
+  if (offen.length) { out.push("Offen"); offen.forEach(function (i) { out.push(zeile(i)); }); out.push(""); }
+  if (fertig.length) { out.push("Erledigt"); fertig.forEach(function (i) { out.push(zeile(i)); }); out.push(""); }
+  if (!rows.length) out.push("(keine Einträge)");
+  return out.join("\n").replace(/\n+$/, "") + "\n";
+}
+function copyText(text, meldung) {
+  function ersatz() { textModal("Text kopieren", "Text markieren und mit Strg+C kopieren.", text); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { showToast(meldung); }, ersatz);
+  } else {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (ok) showToast(meldung); else ersatz();
+    } catch (e) { ersatz(); }
+  }
 }
 
 function renderGhost(sec) {
@@ -2302,7 +2464,7 @@ function addItems(raw, forceImportant) {
         important: prepared[i].important, pinned: false,
         createdAt: now + i, createdDayKey: todayKey, dayKey: todayKey,
         doneAt: null, doneDayKey: null, updatedAt: now + i, seq: seq, carryCount: 0,
-        deferred: false, tags: tagsOf(prepared[i].text)
+        deferred: false, repeat: null, tags: tagsOf(prepared[i].text)
       };
       st.items.push(item);
       created.push(item);
@@ -2343,13 +2505,32 @@ function toggleDone(id) {
   var willReopenAndCarry = wasDone && state.settings.carryOver && !item.pinned && item.dayKey < todayKey;
   var now = Date.now();
 
-  withItem(id, wasDone ? "Wieder geöffnet" : "Erledigt", function (it) {
+  /* Rhythmus vom geplanten Tag aus weiterzählen, aber nie in der Vergangenheit landen. */
+  var repeatNext = null;
+  if (!wasDone && item.repeat) {
+    repeatNext = nextRepeatKey(item.repeat, item.dayKey);
+    var schutz = 0;
+    while (repeatNext && repeatNext <= todayKey && schutz++ < 400) {
+      repeatNext = nextRepeatKey(item.repeat, repeatNext);
+    }
+  }
+
+  withItem(id, wasDone ? "Wieder geöffnet" : "Erledigt", function (it, st) {
     if (wasDone) {
       it.done = false; it.doneAt = null; it.doneDayKey = null;
       if (willReopenAndCarry) { it.dayKey = todayKey; it.carryCount = (it.carryCount || 0) + 1; }
     } else {
       it.done = true; it.doneAt = now; it.doneDayKey = todayKey;
       if (it.dayKey > todayKey) { it.dayKey = todayKey; it.deferred = false; }
+      if (repeatNext) {
+        var rseq = st.meta.seqCounter++;
+        st.items.push({
+          id: newId(rseq), text: it.text, done: false, important: it.important,
+          pinned: false, deferred: true, createdAt: now, createdDayKey: todayKey,
+          dayKey: repeatNext, doneAt: null, doneDayKey: null, updatedAt: now,
+          seq: rseq, carryCount: 0, repeat: it.repeat, tags: tagsOf(it.text)
+        });
+      }
     }
     it.updatedAt = now;
   });
@@ -2362,6 +2543,14 @@ function toggleDone(id) {
     focusRow(id, "cb");
     announce("Wieder offen. Nach heute übernommen.");
     showToast("Wieder offen und auf heute übernommen", function () { Undo.revertTo(undoEntry); });
+    return;
+  }
+
+  if (repeatNext) {
+    renderAll();
+    focusRow(id, "cb");
+    announce("Erledigt. Nächster Termin am " + fmtLongFull(repeatNext) + ".");
+    showToast("Nächster Termin: " + fmtLong(repeatNext), function () { Undo.revertTo(undoEntry); });
     return;
   }
 
@@ -2460,7 +2649,10 @@ function deleteItem(id) {
 
   withUndo("Eintrag gelöscht", function (st) {
     st.items = st.items.filter(function (x) { return x.id !== id; });
-    st.tombstones.push({ id: id, deletedAt: Date.now() });
+    /* Der Eintrag selbst wandert mit in den Grabstein, sonst gäbe es
+       nichts wiederherzustellen. Nach 30 Tagen räumt normalise auf. */
+    st.tombstones.push({ id: id, deletedAt: Date.now(), item: JSON.parse(JSON.stringify(item)) });
+    if (st.tombstones.length > 300) st.tombstones = st.tombstones.slice(-300);
   });
   var undoEntry = Undo.lastEntry;
   foldCache.delete(id);
@@ -2818,7 +3010,10 @@ function openOverflowMenu() {
       mutate(function () {}); closePopover();
     }));
     node.appendChild(el("div", "pop__sep"));
-    [["Tastenkürzel …", openShortcuts], ["Daten exportieren …", doExport], ["Daten importieren …", doImport]]
+    [["Zu einem Tag springen …", openJump], ["Tastenkürzel …", openShortcuts],
+     ["Papierkorb …", openTrash], ["Daten exportieren …", doExport],
+     ["Daten importieren …", doImport], ["Daten kopieren", copyState],
+     ["Daten einfügen …", pasteModal]]
       .forEach(function (pair) {
         var b = el("button", "menuitem", pair[0]);
         b.type = "button";
@@ -2827,6 +3022,30 @@ function openOverflowMenu() {
         node.appendChild(b);
       });
   }, { label: "Weitere Optionen", role: "menu" });
+}
+
+/* Wiederholung setzen oder abstellen. */
+function setRepeat(id, kind) {
+  withItem(id, "Wiederholung", function (it) {
+    it.repeat = kind;
+    it.updatedAt = Date.now();
+  });
+  renderAll();
+  focusRow(id, "cb");
+  announce(kind ? "Wiederholt sich " + REPEAT_LABEL[kind] + "." : "Wiederholung entfernt.");
+}
+function addRepeatRow(node, id, item) {
+  var wrap = el("div", "deferrow");
+  wrap.appendChild(el("span", "deferrow__label", "Wiederholen:"));
+  [[null, "Keine"]].concat(REPEAT_KINDS.map(function (k) { return [k, REPEAT_LABEL[k]]; }))
+    .forEach(function (o) {
+      var b = el("button", "chip", o[1]);
+      b.type = "button";
+      b.setAttribute("aria-pressed", (item.repeat || null) === o[0] ? "true" : "false");
+      b.addEventListener("click", function () { closePopover(); setRepeat(id, o[0]); });
+      wrap.appendChild(b);
+    });
+  node.appendChild(wrap);
 }
 
 /* Eine Zeile mit schnellen Terminen plus freier Datumswahl. */
@@ -2858,6 +3077,127 @@ function addDeferRow(node, id) {
   wrap.appendChild(inp);
   node.appendChild(wrap);
 }
+/* Wiederherstellen aus dem Papierkorb. */
+function restoreItem(tid) {
+  var grab = null;
+  for (var i = 0; i < state.tombstones.length; i++) if (state.tombstones[i].id === tid) grab = state.tombstones[i];
+  if (!grab || !grab.item) return;
+  withUndo("Wiederhergestellt", function (st) {
+    st.tombstones = st.tombstones.filter(function (t) { return t.id !== tid; });
+    if (st.items.some(function (x) { return x.id === tid; })) return;
+    var kopie = JSON.parse(JSON.stringify(grab.item));
+    kopie.updatedAt = Date.now();
+    kopie.tags = tagsOf(kopie.text);
+    st.items.push(kopie);
+  });
+  foldCache.clear();
+  renderAll();
+  announce("Eintrag wiederhergestellt.");
+  showToast("Wiederhergestellt: " + grab.item.text.slice(0, 40));
+}
+/* Zu einem Tag springen. Lädt bei Bedarf ältere Tage nach und setzt
+   Filter zurück, sonst wäre der Zieltag womöglich gar nicht gezeichnet. */
+function jumpToDay(key) {
+  if (!isDayKey(key)) return;
+  var todayKey = syncToday();
+  var u = state.settings.ui;
+  var hatteFilter = isFiltered();
+  u.statusFilter = "alle"; u.activeTags = []; u.onlyImportant = false;
+  ui.query = ""; ui.terms = [];
+  document.getElementById("search").value = "";
+
+  if (key > todayKey) u.plannedOpen = true;
+  else {
+    var tage = Object.create(null);
+    state.items.forEach(function (i) { if (i.dayKey <= todayKey) tage[i.dayKey] = 1; });
+    tage[todayKey] = 1;
+    var keys = Object.keys(tage).sort().reverse();
+    var pos = 0;
+    while (pos < keys.length && keys[pos] > key) pos++;
+    u.daysLoaded = Math.max(u.daysLoaded, pos + 1);
+  }
+  mutate(function () {});
+  renderAll();
+
+  var ziel = null;
+  $$(".day").forEach(function (d) { if (!ziel && d.dataset.key <= key) ziel = d; });
+  if (key > todayKey) ziel = document.querySelector(".planned") || ziel;
+  if (!ziel) { announce("Kein Tag gefunden."); return; }
+  var kopf = ziel.querySelector(".day__head") || ziel.querySelector(".groupdiv");
+  ziel.scrollIntoView({ block: "start", behavior: reduceMotion() ? "auto" : "smooth" });
+  if (kopf) kopf.focus({ preventScroll: true });
+  var genau = ziel.dataset && ziel.dataset.key === key;
+  announce((genau ? fmtLongFull(key) : "Nächster Tag mit Einträgen: " + (kopf ? kopf.textContent : "")) +
+    (hatteFilter ? " Filter zurückgesetzt." : ""));
+}
+function openJump() {
+  openModal(function (box) {
+    box.appendChild(el("h2", null, "Zu einem Tag springen"));
+    box.appendChild(el("p", null, "Ältere Tage werden bei Bedarf nachgeladen. Filter und Suche werden zurückgesetzt."));
+    var inp = document.createElement("input");
+    inp.type = "date";
+    inp.className = "jumpdate";
+    inp.value = ui.todayKey;
+    inp.setAttribute("aria-label", "Datum");
+    box.appendChild(inp);
+    var foot = el("div", "modal__foot");
+    var ok = el("button", "primary", "Springen");
+    ok.type = "button";
+    ok.addEventListener("click", function () { var v = inp.value; closeModal(); jumpToDay(v); });
+    var ab = el("button", "ghost", "Abbrechen");
+    ab.type = "button";
+    ab.addEventListener("click", closeModal);
+    foot.appendChild(ok); foot.appendChild(ab);
+    box.appendChild(foot);
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); ok.click(); } });
+  }, "Zu einem Tag springen");
+}
+function openTrash() {
+  openModal(function (box) {
+    box.appendChild(el("h2", null, "Papierkorb"));
+    var mit = state.tombstones.filter(function (t) { return !!t.item; })
+      .slice().sort(function (a, b) { return b.deletedAt - a.deletedAt; });
+    box.appendChild(el("p", null, mit.length
+      ? "Gelöschtes wird 30 Tage aufbewahrt und danach endgültig entfernt."
+      : "Nichts gelöscht. Hier landet, was du in den letzten 30 Tagen entfernt hast."));
+    if (mit.length) {
+      var liste = el("div", "pop__list");
+      liste.style.maxHeight = "46vh";
+      mit.forEach(function (t) {
+        var r = el("div", "trashrow");
+        var txt = el("div", "trashrow__text");
+        txt.appendChild(el("div", null, t.item.text.replace(/\s*\n\s*/g, " ")));
+        txt.appendChild(el("div", "trashrow__meta",
+          "gelöscht am " + fmtNum(dayKeyOf(new Date(t.deletedAt))) + " um " + fmtTime(t.deletedAt)));
+        r.appendChild(txt);
+        var b = el("button", "linkbtn", "Wiederherstellen");
+        b.type = "button";
+        b.addEventListener("click", function () { closeModal(); restoreItem(t.id); });
+        r.appendChild(b);
+        liste.appendChild(r);
+      });
+      box.appendChild(liste);
+    }
+    var foot = el("div", "modal__foot");
+    if (mit.length) {
+      var leeren = el("button", "ghost", "Papierkorb leeren");
+      leeren.type = "button";
+      leeren.addEventListener("click", function () {
+        withUndo("Papierkorb geleert", function (st) {
+          st.tombstones = st.tombstones.map(function (t) { return { id: t.id, deletedAt: t.deletedAt }; });
+        });
+        closeModal();
+        showToast("Papierkorb geleert", function () { Undo.undo(); });
+      });
+      foot.appendChild(leeren);
+    }
+    var zu = el("button", "primary", "Schließen");
+    zu.type = "button";
+    zu.addEventListener("click", closeModal);
+    foot.appendChild(zu);
+    box.appendChild(foot);
+  }, "Papierkorb");
+}
 function openRowMenu(anchor, id) {
   var item = findItem(id);
   if (!item) return;
@@ -2873,6 +3213,7 @@ function openRowMenu(anchor, id) {
     add(item.important ? "Wichtig-Markierung entfernen" : "Als wichtig markieren", function () { toggleImportant(id); });
     add("Bearbeiten", function () { startEdit(id); });
     if (!item.done) addDeferRow(node, id);
+    addRepeatRow(node, id, item);
     if (item.dayKey > ui.todayKey) add("Auf heute holen", function () { pullToToday(id); });
     else if (item.pinned) add("Wieder mitnehmen", function () { setPinned(id, false); });
     else if (item.dayKey !== item.createdDayKey) add("Am Ursprungstag lassen", function () { setPinned(id, true, item.createdDayKey); });
@@ -2917,7 +3258,8 @@ function closeModal() {
 var SHORTCUTS = [
   ["Überall", [["N", "Fokus in die Eingabezeile"], ["/", "Fokus ins Suchfeld"],
     ["1 2 3", "Filter Alle / Offen / Erledigt"], ["Umschalt+W", "Nur wichtige anzeigen"],
-    ["Umschalt+D", "Design wechseln"], ["Strg+Z", "Rückgängig"], ["Strg+Umschalt+Z", "Wiederherstellen"],
+    ["Umschalt+D", "Design wechseln"], ["G", "Zu einem Tag springen"],
+    ["Strg+Z", "Rückgängig"], ["Strg+Umschalt+Z", "Wiederherstellen"],
     ["?", "Diese Übersicht"]]],
   ["Eingabezeile", [["Eingabe", "Anlegen"], ["Umschalt+Eingabe", "Neue Zeile"],
     ["Strg+Eingabe", "Anlegen und als wichtig markieren"], ["Esc", "Feld leeren, nochmal Esc verlässt es"]]],
@@ -2979,10 +3321,11 @@ function doExport() {
   renderFooter();
   showToast("Export gestartet: " + exportFilename());
 }
-function exportFallback(json) {
+function exportFallback(json) { textModal("Daten exportieren", "Text markieren und mit Strg+C kopieren.", json); }
+function textModal(titel, hinweis, json) {
   openModal(function (box) {
-    box.appendChild(el("h2", null, "Daten exportieren"));
-    box.appendChild(el("p", null, "Text markieren und mit Strg+C kopieren."));
+    box.appendChild(el("h2", null, titel));
+    box.appendChild(el("p", null, hinweis));
     var ta = document.createElement("textarea");
     ta.readOnly = true;
     ta.value = json;
@@ -3001,8 +3344,90 @@ function exportFallback(json) {
     close.addEventListener("click", closeModal);
     foot.appendChild(copy); foot.appendChild(close);
     box.appendChild(foot);
-  }, "Daten exportieren");
+  }, titel);
 }
+/* Zwei Stände zusammenführen. Grabsteine beider Seiten zählen mit, sonst
+   taucht Gelöschtes beim nächsten Abgleich wieder auf. */
+function mergeIncoming(st, incoming) {
+  var bericht = { neu: 0, aktualisiert: 0, geloescht: 0 }, i;
+  var byId = Object.create(null);
+  for (i = 0; i < st.items.length; i++) byId[st.items[i].id] = st.items[i];
+  for (i = 0; i < incoming.items.length; i++) {
+    var it = incoming.items[i], mein = byId[it.id];
+    if (!mein) { byId[it.id] = it; bericht.neu++; }
+    else if (it.updatedAt > mein.updatedAt) { byId[it.id] = it; bericht.aktualisiert++; }
+  }
+  var graeber = Object.create(null);
+  st.tombstones.forEach(function (t) { graeber[t.id] = t; });
+  (incoming.tombstones || []).forEach(function (t) {
+    if (!graeber[t.id] || t.deletedAt > graeber[t.id].deletedAt) graeber[t.id] = t;
+  });
+  Object.keys(graeber).forEach(function (tid) {
+    var t = graeber[tid], mein = byId[tid];
+    /* Eine Bearbeitung NACH dem Löschen gewinnt gegen den Grabstein. */
+    if (mein && t.deletedAt >= (mein.updatedAt || 0)) { delete byId[tid]; bericht.geloescht++; }
+  });
+  var out = [];
+  for (var k in byId) out.push(byId[k]);
+  st.items = out;
+  st.tombstones = Object.keys(graeber).map(function (x) { return graeber[x]; }).slice(-300);
+  st.meta.seqCounter = Math.max(st.meta.seqCounter, incoming.meta.seqCounter || 1);
+  return bericht;
+}
+function berichtText(b) {
+  var teile = [];
+  if (b.neu) teile.push(b.neu + (b.neu === 1 ? " neuer Eintrag" : " neue Einträge"));
+  if (b.aktualisiert) teile.push(b.aktualisiert + " aktualisiert");
+  if (b.geloescht) teile.push(b.geloescht + " gelöscht");
+  return teile.length ? teile.join(", ") : "Nichts Neues, beide Stände waren gleich";
+}
+function abgleichen(rohtext) {
+  var parsed;
+  try { parsed = JSON.parse(rohtext); }
+  catch (e) { showToast("Das war kein gültiger Datenstand."); return false; }
+  if (!parsed || !Array.isArray(parsed.items)) { showToast("Das war kein gültiger Datenstand."); return false; }
+  var incoming = normalise(parsed, ui.todayKey);
+  var vorher = Undo.snap();
+  var bericht = mutate(function (st) { return mergeIncoming(st, incoming); });
+  Undo.push("Abgleich", vorher);
+  var undoEntry = Undo.lastEntry;
+  foldCache.clear();
+  carryOverPass(true);
+  renderAll();
+  var text = berichtText(bericht);
+  announce("Abgleich: " + text + ".");
+  showToast(text, function () { Undo.revertTo(undoEntry); });
+  return true;
+}
+function pasteModal() {
+  openModal(function (box) {
+    box.appendChild(el("h2", null, "Daten einfügen"));
+    box.appendChild(el("p", null,
+      "Einen mit „Daten kopieren“ erzeugten Stand hier einfügen. " +
+      "Beide Stände werden zusammengeführt, nichts wird überschrieben."));
+    var ta = document.createElement("textarea");
+    ta.setAttribute("aria-label", "Datenstand einfügen");
+    ta.placeholder = "Hier einfügen …";
+    box.appendChild(ta);
+    var foot = el("div", "modal__foot");
+    var ok = el("button", "primary", "Abgleichen");
+    ok.type = "button";
+    ok.addEventListener("click", function () {
+      var v = ta.value.trim();
+      if (!v) return;
+      if (abgleichen(v)) closeModal();
+    });
+    var ab = el("button", "ghost", "Abbrechen");
+    ab.type = "button";
+    ab.addEventListener("click", closeModal);
+    foot.appendChild(ok); foot.appendChild(ab);
+    box.appendChild(foot);
+  }, "Daten einfügen");
+}
+function copyState() {
+  copyText(JSON.stringify(state), "Datenstand kopiert, jetzt auf dem anderen Gerät einfügen");
+}
+
 function doImport() {
   var input = document.createElement("input");
   input.type = "file";
@@ -3017,27 +3442,15 @@ function doImport() {
       catch (e) { showToast("Datei konnte nicht gelesen werden."); return; }
       var incoming = normalise(parsed, ui.todayKey);
       var before = Undo.snap();
-      var added = mutate(function (st) {
-        var byId = Object.create(null), i;
-        for (i = 0; i < st.items.length; i++) byId[st.items[i].id] = st.items[i];
-        var added = 0;
-        for (i = 0; i < incoming.items.length; i++) {
-          var it = incoming.items[i];
-          if (!byId[it.id] || it.updatedAt > byId[it.id].updatedAt) { byId[it.id] = it; added++; }
-        }
-        var out = [];
-        for (var k in byId) out.push(byId[k]);
-        st.items = out;
-        st.meta.seqCounter = Math.max(st.meta.seqCounter, incoming.meta.seqCounter);
-        return added;
-      });
+      var bericht = mutate(function (st) { return mergeIncoming(st, incoming); });
       Undo.push("Import", before);
+      var undoEntry = Undo.lastEntry;
       foldCache.clear();
       carryOverPass(true);
       renderAll();
-      showToast(added ? (added === 1 ? "1 Eintrag übernommen." : added + " Einträge übernommen.")
-                      : "Nichts Neues in der Datei.",
-        added ? function () { Undo.undo(); } : null);
+      var text = berichtText(bericht);
+      announce("Import: " + text + ".");
+      showToast(text, function () { Undo.revertTo(undoEntry); });
     };
     rd.readAsText(f);
   });
@@ -3355,6 +3768,8 @@ function onKeydown(e) {
     case "3": e.preventDefault(); setStatusFilter("erledigt"); return;
     case "?":
       e.preventDefault(); openShortcuts(); return;
+    case "g":
+      e.preventDefault(); openJump(); return;
     case "w":
       if (e.shiftKey) {
         e.preventDefault();

@@ -21,8 +21,8 @@ Zwei Wege, beide ohne Installation.
 
 Beide führen dieselbe App aus, teilen sich aber **keine Daten**. Browser trennen
 den Speicher nach Adresse, eine lokale Datei und eine Webadresse sind zwei
-verschiedene Ablagen. Wer beides nutzen will, überträgt die Notizen über
-**Daten exportieren** und **Daten importieren**.
+verschiedene Ablagen. Wer beides nutzen will, gleicht sie von Hand ab, siehe
+[Abgleich](#tag-kopieren-papierkorb-abgleich).
 
 Es gibt nichts zu installieren und nichts einzurichten. Die App läuft in Chrome,
 Edge und Firefox. Erscheint oben ein roter Hinweis auf fehlenden Speicher, blockiert
@@ -41,6 +41,12 @@ lokalen Webserver auszuliefern statt sie direkt zu öffnen.
   UND-verknüpft, `"in Anführungszeichen"` sucht die genaue Wortfolge.
 - **Wiedervorlage**: ein Eintrag lässt sich auf ein Datum in der Zukunft legen und
   verschwindet bis dahin aus dem Tagesgeschäft.
+- **Wiederholungen**: täglich, werktags, wöchentlich oder monatlich. Beim Abhaken
+  entsteht der nächste Termin von selbst.
+- **Adressen sind anklickbar.** Was im Text wie eine Webadresse aussieht, wird zum
+  Verweis und öffnet sich in einem neuen Tab.
+- **Papierkorb**: Gelöschtes bleibt 30 Tage wiederherstellbar.
+- **Tag als Text kopieren**, fertig für eine Mail oder ein Protokoll.
 - **Filter** für alle, offene oder erledigte Einträge, dazu ein Schalter für
   „nur wichtige".
 - **Hell, dunkel oder Systemeinstellung**, umschaltbar über das Symbol in der Kopfzeile.
@@ -109,6 +115,43 @@ Weitere Regeln:
 - Steht ein Eintrag in der Zukunft, **ohne** vorgemerkt zu sein, weist die App im
   Datumsschild darauf hin. Das ist fast immer eine falsch gestellte Uhr.
 
+## Wiederholungen
+
+Im Zeilenmenü steht eine Zeile **Wiederholen** mit fünf Möglichkeiten:
+
+| Auswahl | Nächster Termin |
+|---|---|
+| **Keine** | keiner, der Standard |
+| **täglich** | ein Tag später |
+| **werktags** | nächster Tag von Montag bis Freitag |
+| **wöchentlich** | sieben Tage später |
+| **monatlich** | derselbe Tag im Folgemonat |
+
+Ein wiederkehrender Eintrag trägt ein Abzeichen mit seinem Rhythmus. Hakst du ihn
+ab, legt die App sofort den nächsten Termin an und schiebt ihn nach *Geplant*.
+
+Zwei Feinheiten, die im Alltag zählen:
+
+- **Der Rhythmus zählt vom geplanten Tag weiter, nicht vom Tag des Abhakens.** Wer
+  den Wochenbericht vom Montag erst am Mittwoch abhakt, bekommt den nächsten
+  trotzdem am Montag. Liegt der so errechnete Termin schon in der Vergangenheit,
+  zählt die App weiter, bis er nach heute liegt.
+- **Monatlich rutscht nie in den Folgemonat.** Der 31. Januar wird zum 28. Februar,
+  nicht zum 3. März.
+
+## Adressen im Text
+
+Was mit `https://`, `http://` oder `www.` beginnt, wird beim Anzeigen zu einem
+Verweis und öffnet sich in einem neuen Tab. Satzzeichen am Ende und unpassende
+Klammern bleiben außen vor, `(https://example.de/x)` verlinkt also ohne Klammer.
+
+Der Verweis wird nie aus beliebigem Text zusammengesetzt. Erkannt wird nur, was
+zwingend mit einem dieser drei Anfänge beginnt, und das Ergebnis muss danach noch
+eine Prüfung auf `http` oder `https` bestehen. Etwas wie `javascript:` kann so gar
+nicht erst entstehen.
+
+Im Bearbeitungsfeld siehst du wieder den rohen Text, wie bei den Tags auch.
+
 ## Tags und Wichtig
 
 Beides schreibst du direkt in den Text, es gibt keine Extra-Felder.
@@ -134,7 +177,7 @@ Einzelne Tasten wirken nur, wenn kein Textfeld den Fokus hat. Die Feststelltaste
 stört nicht.
 
 Im Menü hinter den drei Punkten schaltet **Tastenkürzel aktiv** die Einzelzeichen ab,
-also `N`, `/`, `1`, `2`, `3`, `?`, `W`, `D`, `S`, `j` und `k`. Das ist die Ausstiegsklappe,
+also `N`, `/`, `1`, `2`, `3`, `?`, `G`, `W`, `D`, `S`, `j` und `k`. Das ist die Ausstiegsklappe,
 die Vorlesesoftware und Spracheingabe brauchen, weil solche Tasten dort sonst
 ungewollt auslösen.
 
@@ -150,6 +193,7 @@ abgeschalteten Kürzeln vollständig bedienbar.
 | `1` `2` `3` | Filter Alle / Offen / Erledigt |
 | `Umschalt+W` | Nur wichtige anzeigen |
 | `Umschalt+D` | Design wechseln |
+| `G` | Zu einem Tag springen |
 | `Strg+Z` / `Strg+Umschalt+Z` | Rückgängig / Wiederherstellen |
 | `?` | Übersicht aller Kürzel |
 
@@ -183,13 +227,43 @@ Sobald die Eingabezeile mehrere Zeilen enthält, eingefügt oder mit
 anlegen** und **Als einen Eintrag anlegen**. Voreingestellt ist ein Eintrag je
 Zeile. Wer nichts anklickt, bekommt beim Absenden die Aufteilung.
 
+## Tag kopieren, Papierkorb, Abgleich
+
+**Einen Tag als Text kopieren.** Rechts in jeder Tagesüberschrift sitzt ein kleiner
+Knopf, sichtbar sobald der Mauszeiger über dem Tag steht. Er legt den Tag als
+Klartext in die Zwischenablage, nach Offen und Erledigt getrennt und fertig zum
+Einfügen in eine Mail.
+
+**Papierkorb.** Gelöschte Einträge wandern mitsamt Inhalt in den Papierkorb und
+lassen sich dort 30 Tage lang zurückholen. Danach räumt die App sie beim Starten
+endgültig weg. Zu finden im Menü hinter den drei Punkten.
+
+**Abgleich zwischen zwei Geräten.** Es gibt keinen Server, also auch keine
+automatische Synchronisierung. Stattdessen führst du zwei Stände zusammen:
+
+1. Auf Gerät A im Menü **Daten kopieren** wählen, oder **Daten exportieren** für
+   eine Datei.
+2. Auf Gerät B **Daten einfügen** wählen und den Stand einsetzen, oder
+   **Daten importieren** für die Datei.
+
+Zusammengeführt wird, nicht überschrieben. Bei einem Eintrag, den es auf beiden
+Seiten gibt, gewinnt die jüngere Änderung. Löschungen wandern über den Papierkorb
+mit, damit Gelöschtes beim nächsten Abgleich nicht wieder auftaucht. Wurde ein
+Eintrag auf der einen Seite gelöscht und auf der anderen danach noch bearbeitet,
+gewinnt die Bearbeitung. Am Ende meldet die App, wie viel neu war, geändert wurde
+und wegfiel, und ein Knopf macht den ganzen Abgleich rückgängig.
+
+**Zu einem Tag springen.** Über `G` oder das Menü. Ältere Tage werden dabei
+nachgeladen, Filter und Suche zurückgesetzt. Gibt es am Zieltag nichts, landest du
+beim nächstälteren Tag mit Einträgen.
+
 ## Wo die Daten liegen
 
 Im `localStorage` deines Browsers, unter diesen Schlüsseln:
 
 | Schlüssel | Inhalt |
 |---|---|
-| `notizen.tb.v1` | Alle Einträge und Einstellungen |
+| `notizen.tb.v1` | Alle Einträge, der Papierkorb und die Einstellungen |
 | `notizen.tb.v1.bak` | Sicherung des letzten fehlerfrei gelesenen Standes |
 | `notizen.tb.v1.hb` | Lebenszeichen, erkennt einen zweiten offenen Tab |
 | `notizen.corrupt.<Zeitstempel>` | Rohkopie eines unlesbaren Standes, wird nur beim Start angelegt, wenn die Daten nicht gelesen werden konnten |
